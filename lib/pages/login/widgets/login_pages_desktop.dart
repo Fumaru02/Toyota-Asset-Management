@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../controllers/login_controller.dart';
 import '../../../utils/app_colors.dart';
@@ -22,14 +23,16 @@ class LoginPagesDesktop extends StatelessWidget {
     return Row(
       children: <Widget>[
         SizedBox(
-          width: SizeConfig.horizontal(50),
-          height: SizeConfig.horizontal(60),
+          width: SizeConfig.horizontal(49.4),
           child: Center(
             child: Image.asset(
               AssetList.coverLogo,
-              fit: BoxFit.fill,
+              fit: BoxFit.fitWidth,
             ),
           ),
+        ),
+        const SpaceSizer(
+          horizontal: 6,
         ),
         if (loginController.isTappedSignUp.isTrue)
           RegisterForm(loginController: loginController)
@@ -220,7 +223,8 @@ class LoginForm extends StatelessWidget {
                 text: 'Login with Google',
                 radius: 0.5,
                 borderColor: AppColors.maroon,
-                onTap: () => loginController.signInWithGoogle()),
+                // onTap: () => loginController.signInWithGoogle(),
+                onTap: () => context.goNamed('dashboard')),
             const SpaceSizer(
               vertical: 5,
             ),

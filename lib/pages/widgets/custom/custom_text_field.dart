@@ -33,6 +33,7 @@ class CustomTextField extends StatelessWidget {
     this.onFieldSubmitted,
     this.minLines,
     this.focus,
+    this.style,
     this.keyboardType,
   });
   final String title;
@@ -59,7 +60,7 @@ class CustomTextField extends StatelessWidget {
   final Function(String)? onFieldSubmitted;
   final int? minLines;
   final FocusNode? focus;
-
+  final TextStyle? style;
   final TextInputType? keyboardType;
   @override
   Widget build(BuildContext context) {
@@ -126,6 +127,7 @@ class CustomTextField extends StatelessWidget {
                               labelStyle: RobotoStyle().labelStyle())),
                     )
                   : TextFormField(
+                      style: style,
                       autofillHints: autofillHint,
                       minLines: minLines,
                       controller: controller,

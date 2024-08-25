@@ -21,10 +21,14 @@ class AppColors {
   static Color black = AppColors.hex(colorCode: '#000000');
   static Color white = AppColors.hex(colorCode: '#FFFFFF');
   static Color blueDark = AppColors.hex(colorCode: '#0C359E');
+  static Color cyan = AppColors.hex(colorCode: '#CAF4FF');
   static Color greyDisabled = AppColors.hex(colorCode: '#DADADA');
+  static Color grey = AppColors.hex(colorCode: '#B5C0D0');
+  static Color greySecond = AppColors.hex(colorCode: '#EEEEEE');
   static Color orangeActive = AppColors.hex(colorCode: '#D37116');
-  static Color maroon = AppColors.hex(colorCode: '#891652');
-  static Color maroonTransparent = AppColors.hex(colorCode: '#FFC4C4');
+  //primary
+  static Color maroon = AppColors.hex(colorCode: '#3FA2F6');
+  static Color blueTransparent = AppColors.hex(colorCode: '#CAF4FF');
   static Color rippleColor =
       AppColors.hex(colorCode: '#EFEFEF').withOpacity(0.20);
 }

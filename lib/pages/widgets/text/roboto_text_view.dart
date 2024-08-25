@@ -54,8 +54,35 @@ class RobotoTextView extends StatelessWidget {
 class RobotoStyle {
   TextStyle labelStyle() {
     return GoogleFonts.roboto(
-      color: Colors.grey,
-      fontSize: SizeConfig.safeBlockHorizontal * 3.5,
+      color: Colors.white,
+      fontSize: SizeConfig.safeBlockHorizontal * 1.2,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.bold,
+    );
+  }
+
+  TextStyle dropdownStyle() {
+    return GoogleFonts.roboto(
+      color: Colors.white,
+      fontSize: SizeConfig.safeBlockHorizontal * 1.2,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.bold,
+    );
+  }
+
+  TextStyle textfieldStyle() {
+    return GoogleFonts.roboto(
+      color: Colors.black,
+      fontSize: SizeConfig.safeBlockHorizontal * 0.8,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+    );
+  }
+
+  TextStyle unSelectedStyle() {
+    return GoogleFonts.roboto(
+      color: Colors.black54,
+      fontSize: SizeConfig.safeBlockHorizontal * 1.2,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w500,
     );
