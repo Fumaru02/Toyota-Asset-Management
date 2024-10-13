@@ -285,12 +285,14 @@ class LoginForm extends StatelessWidget {
               vertical: 3,
             ),
             CustomFlatButton(
-              text: 'Login',
-              radius: 0.5,
-              textColor: AppColors.white,
-              backgroundColor: AppColors.maroon,
-              onTap: () {},
-            ),
+                text: 'Login',
+                radius: 0.5,
+                textColor: AppColors.white,
+                backgroundColor: AppColors.maroon,
+                onTap: () {
+                  loginController.signInWithEmailAndPassword();
+              
+                }),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[

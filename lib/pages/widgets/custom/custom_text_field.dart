@@ -20,6 +20,7 @@ class CustomTextField extends StatelessWidget {
     this.textColor,
     this.hintTextColor,
     this.borderColor,
+    this.borderSideColor,
     this.isPasswordField = false,
     this.suffixIcon,
     this.onChanged,
@@ -47,6 +48,7 @@ class CustomTextField extends StatelessWidget {
   final Color? textColor;
   final Color? hintTextColor;
   final Color? borderColor;
+  final Color? borderSideColor;
   final bool? isPasswordField;
   final Widget? suffixIcon;
   final Function(String)? onChanged;
@@ -127,6 +129,7 @@ class CustomTextField extends StatelessWidget {
                               labelStyle: RobotoStyle().labelStyle())),
                     )
                   : TextFormField(
+                    
                       style: style,
                       autofillHints: autofillHint,
                       minLines: minLines,
@@ -140,10 +143,14 @@ class CustomTextField extends StatelessWidget {
                       keyboardType: keyboardType ?? TextInputType.text,
                       // ignore: avoid_bool_literals_in_conditional_expressions, use_if_null_to_convert_nulls_to_bools
                       decoration: InputDecoration(
+                        
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: borderSideColor ?? AppColors.black),
+                          ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(
-                                color: borderColor ?? AppColors.maroon,
-                                width: 2.0),
+                                color: borderColor ?? AppColors.maroon),
                           ),
                           contentPadding: contentPadding,
                           prefixIcon: prefixIcon,
@@ -151,6 +158,8 @@ class CustomTextField extends StatelessWidget {
                           fillColor: AppColors.white,
                           filled: true,
                           border: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: borderSideColor ?? AppColors.black),
                               borderRadius: BorderRadius.all(Radius.circular(
                                   SizeConfig.horizontal(borderRadius ?? 0.5)))),
                           labelText: labelText,

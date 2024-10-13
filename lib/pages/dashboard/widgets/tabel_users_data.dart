@@ -40,11 +40,11 @@ class TabelUsersData extends StatelessWidget {
                 rows: dashboardController.rows,
                 onChanged: (PlutoGridOnChangedEvent event) {
                   if (event.column.field == 'role_field') {
-                    final String? username =
-                        event.row.cells['name_field']?.value as String?;
+                    final String? useruid =
+                        event.row.cells['user_uid']?.value as String?;
                     final String newRole = event.value as String;
-                    if (username != null) {
-                      dashboardController.updateUserRole(username, newRole);
+                    if (useruid != null) {
+                      dashboardController.updateUserRole(useruid, newRole);
                     }
                   }
                 },

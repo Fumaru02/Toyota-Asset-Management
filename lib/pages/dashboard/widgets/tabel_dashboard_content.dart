@@ -160,14 +160,14 @@ List<PlutoColumn> columns = <PlutoColumn>[
 
   PlutoColumn(
       width: SizeConfig.horizontal(14),
-      title: 'Lokasi',
+      title: 'Location',
       titleTextAlign: PlutoColumnTextAlign.center,
       field: 'location_value',
       textAlign: PlutoColumnTextAlign.center,
       type: PlutoColumnType.text(),
       titleSpan: WidgetSpan(
         child: RobotoTextView(
-          value: 'Lokasi',
+          value: 'Location',
           size: SizeConfig.safeBlockHorizontal * 1,
           fontWeight: FontWeight.w600,
           color: AppColors.white,
@@ -192,14 +192,14 @@ List<PlutoColumn> columns = <PlutoColumn>[
   ),
   PlutoColumn(
     width: SizeConfig.horizontal(10),
-    title: 'Koordinator',
+    title: 'Coordinator',
     field: 'koordinator_value',
     type: PlutoColumnType.text(),
     titleTextAlign: PlutoColumnTextAlign.center,
     backgroundColor: AppColors.maroon,
     titleSpan: WidgetSpan(
       child: RobotoTextView(
-        value: 'Koordinator',
+        value: 'Coordinator',
         size: SizeConfig.safeBlockHorizontal * 1,
         fontWeight: FontWeight.w600,
         color: AppColors.white,

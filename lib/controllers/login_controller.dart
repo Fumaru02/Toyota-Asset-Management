@@ -29,9 +29,13 @@ class LoginController extends GetxController with GetTickerProviderStateMixin {
   final FocusNode confirmPasswordFocusNode = FocusNode();
   final RxBool isValidated = false.obs;
   final RxBool isValidatedFullname = false.obs;
+
+  final RxBool isLoading = false.obs;
   final RxBool isTappedSignUp = false.obs;
 
   final RxDouble angle = RxDouble(0);
+
+  void get context {}
 
   dynamic changeForm() {
     isTappedSignUp.value = !isTappedSignUp.value;
@@ -129,7 +133,7 @@ class LoginController extends GetxController with GetTickerProviderStateMixin {
       await credential.user?.sendEmailVerification();
       await FirebaseFirestore.instance
           .collection('users')
-          .doc(fullNameController.text.trim())
+          .doc(credential.user!.uid)
           .set(
         <String, dynamic>{
           'user_uid': credential.user!.uid,
@@ -300,66 +304,66 @@ class LoginController extends GetxController with GetTickerProviderStateMixin {
 //     }
 //   }
 
-//   dynamic signInWithEmailAndPassword() async {
-//     try {
-//       isTapped.value = true;
-//       final UserCredential credential = await _auth.signInWithEmailAndPassword(
-//           email: emailController.text.trim(),
-//           password: passwordController.text.trim());
-//       if (!credential.user!.emailVerified) {
-//         Snack.show(SnackbarType.error, 'Email Verification',
-//             'Email kamu belum terverifikasi mohon check inbox/spam');
-//         isTapped.value = false;
-//         return;
-//       }
-//       if (credential.user == null) {
-//         Snack.show(SnackbarType.error, 'Email Verification',
-//             'Email kamu belum terverifikasi mohon check inbox/spam');
-//         isTapped.value = false;
-//         return;
-//       }
-//       getUserToken();
-//       Get.offAllNamed('/frame');
-//       isTapped.value = false;
+  dynamic signInWithEmailAndPassword() async {
+    try {
+      isLoading.value = true;
+      final UserCredential credential = await _auth.signInWithEmailAndPassword(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim());
+      if (!credential.user!.emailVerified) {
+        Snack.show(SnackbarType.error, 'Email Verification',
+            'Email kamu belum terverifikasi mohon check inbox/spam');
+        isLoading.value = false;
+        return;
+      }
+      if (credential.user == null) {
+        Snack.show(SnackbarType.error, 'Email Verification',
+            'Email kamu belum terverifikasi mohon check inbox/spam');
+        isLoading.value = false;
+        return;
+      }
 
-//       return credential.user;
-//     } on FirebaseAuthException catch (e) {
-//       switch (e.code) {
-//         case 'invalid-email':
-//           Snack.show(SnackbarType.error, 'invalid email',
-//               'Email tidak dapat ditemukan coba lagi');
-//           isTapped.value = false;
-//           break;
-//         case 'invalid-credential':
-//           Snack.show(SnackbarType.error, 'wrong email/password',
-//               'Email/Password salah coba lagi');
-//           isTapped.value = false;
-//           break;
-//         case 'user-not-found':
-//           Snack.show(SnackbarType.error, 'Unknown email',
-//               'Akun tidak dapat ditemukan coba lagi/password salah');
-//           isTapped.value = false;
-//           break;
-//         case 'ERROR_USER_DISABLED':
-//           Snack.show(SnackbarType.error, 'Error User',
-//               'Akunmu dihentikan untuk sementara waktu');
-//           isTapped.value = false;
-//           break;
-//         case 'ERROR_TOO_MANY_REQUESTS':
-//           Snack.show(
-//               SnackbarType.error, 'Error', 'Too many request try again later');
-//           isTapped.value = false;
-//           break;
-//         case 'ERROR_OPERATION_NOT_ALLOWED':
-//           Snack.show(SnackbarType.error, 'Unknown user', 'Operasi dihentikan');
-//           isTapped.value = false;
-//           break;
-//         default:
-//           Snack.show(SnackbarType.error, 'Error',
-//               'Something error please try again later');
-//           isTapped.value = false;
-//           return null;
-//       }
-//     }
-//   }
+      isLoading.value = false;
+      router.goNamed('dashboard');
+
+      return credential.user;
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'invalid-email':
+          Snack.show(SnackbarType.error, 'invalid email',
+              'Email tidak dapat ditemukan coba lagi');
+          isLoading.value = false;
+          break;
+        case 'invalid-credential':
+          Snack.show(SnackbarType.error, 'wrong email/password',
+              'Email/Password salah coba lagi');
+          isLoading.value = false;
+          break;
+        case 'user-not-found':
+          Snack.show(SnackbarType.error, 'Unknown email',
+              'Akun tidak dapat ditemukan coba lagi/password salah');
+          isLoading.value = false;
+          break;
+        case 'ERROR_USER_DISABLED':
+          Snack.show(SnackbarType.error, 'Error User',
+              'Akunmu dihentikan untuk sementara waktu');
+          isLoading.value = false;
+          break;
+        case 'ERROR_TOO_MANY_REQUESTS':
+          Snack.show(
+              SnackbarType.error, 'Error', 'Too many request try again later');
+          isLoading.value = false;
+          break;
+        case 'ERROR_OPERATION_NOT_ALLOWED':
+          Snack.show(SnackbarType.error, 'Unknown user', 'Operasi dihentikan');
+          isLoading.value = false;
+          break;
+        default:
+          Snack.show(SnackbarType.error, 'Error',
+              'Something error please try again later');
+          isLoading.value = false;
+          return null;
+      }
+    }
+  }
 }
