@@ -32,7 +32,7 @@ class DashboardContent extends StatelessWidget {
                     children: <Widget>[
                       RobotoTextView(
                         value: 'Pages /',
-                        size: SizeConfig.safeBlockHorizontal * 1,
+                        size: SizeConfig.safeBlockHorizontal * 1.5,
                         color: AppColors.grey,
                       ),
                       const SpaceSizer(
@@ -46,7 +46,7 @@ class DashboardContent extends StatelessWidget {
                         padding: EdgeInsets.all(SizeConfig.horizontal(0.4)),
                         child: RobotoTextView(
                           value: 'Dashboard',
-                          size: SizeConfig.safeBlockHorizontal * 1,
+                          size: SizeConfig.safeBlockHorizontal * 1.5,
                           fontWeight: FontWeight.bold,
                           color: AppColors.white,
                         ),
@@ -202,16 +202,20 @@ class GrapichSelectedPIC extends StatelessWidget {
   const GrapichSelectedPIC({
     super.key,
     required this.dashboardController,
+    this.height,
+    this.width,
   });
 
   final DashboardController dashboardController;
+  final double? height;
+  final double? width;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: AppColors.white,
-      height: SizeConfig.horizontal(20),
-      width: SizeConfig.horizontal(50),
+      height: SizeConfig.horizontal(height ?? 20),
+      width: SizeConfig.horizontal(width ?? 50),
       child: Center(
         // Tambahkan Center di sini
         child: Obx(
@@ -267,16 +271,19 @@ class GrapichSelectedArea extends StatelessWidget {
   const GrapichSelectedArea({
     super.key,
     required this.dashboardController,
+    this.height,
+    this.width,
   });
 
   final DashboardController dashboardController;
-
+  final double? height;
+  final double? width;
   @override
   Widget build(BuildContext context) {
     return Container(
       color: AppColors.white,
-      width: SizeConfig.horizontal(45),
-      height: SizeConfig.horizontal(20),
+      width: SizeConfig.horizontal(width ?? 45),
+      height: SizeConfig.horizontal(height ?? 20),
       child: Center(
         // Tambahkan Center di sini
         child: SfCartesianChart(
@@ -348,16 +355,20 @@ class GrapichAllArea extends StatelessWidget {
   const GrapichAllArea({
     super.key,
     required this.dashboardController,
+    this.height,
+    this.width,
   });
 
   final DashboardController dashboardController;
+  final double? height;
+  final double? width;
 
   @override
   Widget build(BuildContext context) {
     return Container(
         color: AppColors.white,
-        width: SizeConfig.horizontal(75),
-        height: SizeConfig.horizontal(20),
+        width: SizeConfig.horizontal(width ?? 75),
+        height: SizeConfig.horizontal(height ?? 20),
         child: SfCartesianChart(
             primaryXAxis: CategoryAxis(
               axisLabelFormatter: (AxisLabelRenderDetails details) {
@@ -493,19 +504,18 @@ class GrapichAllArea extends StatelessWidget {
 }
 
 class GraphPIC extends StatelessWidget {
-  const GraphPIC({
-    super.key,
-    required this.dashboardController,
-  });
+  const GraphPIC(
+      {super.key, required this.dashboardController, this.height, this.width});
 
   final DashboardController dashboardController;
-
+  final double? height;
+  final double? width;
   @override
   Widget build(BuildContext context) {
     return Container(
         color: AppColors.white,
-        width: SizeConfig.horizontal(80),
-        height: SizeConfig.horizontal(20),
+        width: SizeConfig.horizontal(width ?? 80),
+        height: SizeConfig.horizontal(height ?? 20),
         child: SfCartesianChart(
             primaryXAxis: CategoryAxis(
               axisLabelFormatter: (AxisLabelRenderDetails details) {
@@ -568,6 +578,10 @@ class CustomDropDown extends StatelessWidget {
     required this.initialDropdown,
     required this.selectedDropdown,
     this.countTotalChecked,
+    this.height,
+    this.leftPadding,
+    this.width,
+    this.sizeFont,
   });
 
   final RxList<String> list;
@@ -576,23 +590,27 @@ class CustomDropDown extends StatelessWidget {
   final RxString initialDropdown;
   final Function() selectedDropdown;
   final Function()? countTotalChecked;
+  final double? width;
+  final double? height;
+  final double? leftPadding;
+  final double? sizeFont;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: EdgeInsets.only(left: SizeConfig.horizontal(1)),
+        padding: EdgeInsets.only(left: SizeConfig.horizontal(leftPadding ?? 1)),
         child: Obx(
           () => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               RobotoTextView(
                 value: titleDropDown,
-                size: SizeConfig.safeBlockHorizontal * 1,
+                size: sizeFont ?? SizeConfig.safeBlockHorizontal * 1,
                 fontWeight: FontWeight.w500,
               ),
               Container(
-                width: SizeConfig.horizontal(20),
-                height: SizeConfig.horizontal(2),
+                width: SizeConfig.horizontal(width ?? 20),
+                height: SizeConfig.horizontal(height ?? 2),
                 decoration:
                     BoxDecoration(border: Border.all(color: AppColors.black)),
                 child: DropdownButtonHideUnderline(
@@ -619,7 +637,8 @@ class CustomDropDown extends StatelessWidget {
                           child: RobotoTextView(
                             value:
                                 value.isEmpty ? initialDropdown.value : value,
-                            size: SizeConfig.safeBlockHorizontal * 1,
+                            size:
+                                sizeFont ?? SizeConfig.safeBlockHorizontal * 1,
                           ),
                         ),
                       );

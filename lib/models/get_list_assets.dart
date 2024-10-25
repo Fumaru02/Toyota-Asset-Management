@@ -16,6 +16,7 @@ class GetListAssets {
     required this.noAsset,
     required this.pic,
     required this.coordinator,
+    required this.year,
   });
   factory GetListAssets.fromJson(Map<String, dynamic> json) =>
       _$GetListAssetsFromJson(json);
@@ -42,6 +43,8 @@ class GetListAssets {
   String noAsset;
   @JsonKey(name: 'pic')
   String pic;
+  @JsonKey(name: 'year')
+  String year;
 
   Map<String, dynamic> toJson() => _$GetListAssetsToJson(this);
 }

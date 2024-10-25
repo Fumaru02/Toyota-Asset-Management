@@ -1,4 +1,5 @@
 {
     "java.compile.nullAnalysis.mode": "automatic",
-    "cmake.sourceDirectory": "C:/Users/fadil/OneDrive/Documents/test/asset_checker/linux"
+    "cmake.sourceDirectory": "C:/Users/fadil/OneDrive/Documents/test/asset_checker/linux",
+    "C_Cpp.errorSquiggles": "enabled"
 }

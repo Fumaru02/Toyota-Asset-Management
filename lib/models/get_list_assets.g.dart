@@ -19,6 +19,7 @@ GetListAssets _$GetListAssetsFromJson(Map<String, dynamic> json) =>
       noAsset: json['no_asset'] as String,
       pic: json['pic'] as String,
       coordinator: json['coordinator'] as String,
+      year: json['year'] as String,
     );
 
 Map<String, dynamic> _$GetListAssetsToJson(GetListAssets instance) =>
@@ -34,4 +35,5 @@ Map<String, dynamic> _$GetListAssetsToJson(GetListAssets instance) =>
       'location': instance.location,
       'no_asset': instance.noAsset,
       'pic': instance.pic,
+      'year': instance.year,
     };

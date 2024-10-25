@@ -19,6 +19,7 @@ StagingDataUser _$StagingDataUserFromJson(Map<String, dynamic> json) =>
       location: json['location'] as String,
       noAsset: json['no_asset'] as String,
       pic: json['pic'] as String,
+      year: json['year'] as String,
     );
 
 Map<String, dynamic> _$StagingDataUserToJson(StagingDataUser instance) =>
@@ -34,4 +35,5 @@ Map<String, dynamic> _$StagingDataUserToJson(StagingDataUser instance) =>
       'location': instance.location,
       'no_asset': instance.noAsset,
       'pic': instance.pic,
+      'year': instance.year,
     };

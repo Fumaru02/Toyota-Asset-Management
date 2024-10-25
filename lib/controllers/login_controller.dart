@@ -282,27 +282,29 @@ class LoginController extends GetxController with GetTickerProviderStateMixin {
 //     }
 //   }
 
-//   Future<bool> resetPassword() async {
-//     try {
-//       await _auth.sendPasswordResetEmail(email: emailController.text.trim());
-//       return true;
-//     } on FirebaseAuthException catch (e) {
-//       switch (e.code) {
-//         case 'invalid-email':
-//           Snack.show(SnackbarType.error, 'invalid email',
-//               'Email tidak dapat ditemukan coba lagi');
-//           break;
-//         case 'user-not-found':
-//           Snack.show(SnackbarType.error, 'Unknown email',
-//               'Akun tidak dapat ditemukan coba lagi/password salah');
-//           break;
-//         default:
-//           Snack.show(SnackbarType.error, 'Error',
-//               'Something error please try again later');
-//       }
-//       return false;
-//     }
-//   }
+  Future<bool> resetPassword() async {
+    try {
+      await _auth.sendPasswordResetEmail(email: emailController.text.trim());
+      Snack.show(SnackbarType.success, 'Reset successfully',
+          'Mohon periksa inbox/spam email anda');
+      return true;
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'invalid-email':
+          Snack.show(SnackbarType.error, 'invalid email',
+              'Email tidak dapat ditemukan coba lagi');
+          break;
+        case 'user-not-found':
+          Snack.show(SnackbarType.error, 'Unknown email',
+              'Akun tidak dapat ditemukan coba lagi/password salah');
+          break;
+        default:
+          Snack.show(SnackbarType.error, 'Error',
+              'Something error please try again later');
+      }
+      return false;
+    }
+  }
 
   dynamic signInWithEmailAndPassword() async {
     try {
@@ -325,7 +327,6 @@ class LoginController extends GetxController with GetTickerProviderStateMixin {
 
       isLoading.value = false;
       router.goNamed('dashboard');
-
       return credential.user;
     } on FirebaseAuthException catch (e) {
       switch (e.code) {

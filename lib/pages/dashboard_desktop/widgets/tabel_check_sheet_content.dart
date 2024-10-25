@@ -61,9 +61,11 @@ class TabelCheckSheetContent extends StatelessWidget {
 List<PlutoColumn> columns = <PlutoColumn>[
   /// Text Column definition
   PlutoColumn(
+    
     title: 'No Asset',
     field: 'number_asset',
     type: PlutoColumnType.number(
+      
       format: '####',
     ),
     textAlign: PlutoColumnTextAlign.center,

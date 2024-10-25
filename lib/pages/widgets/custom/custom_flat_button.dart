@@ -16,6 +16,8 @@ class CustomFlatButton extends StatelessWidget {
     this.textSize,
     this.height,
     this.width,
+    this.heightCircleLoading,
+    this.widthCircleLoading,
     this.iconSize,
     this.radius,
     this.image,
@@ -37,6 +39,9 @@ class CustomFlatButton extends StatelessWidget {
   final double? textSize;
   final double? height;
   final double? width;
+  final double? heightCircleLoading;
+  final double? widthCircleLoading;
+
   final double? iconSize;
   final double? radius;
 //String
@@ -76,8 +81,8 @@ class CustomFlatButton extends StatelessWidget {
             if (loading) const SizedBox.shrink() else _buildWrapper(),
             if (loading)
               SizedBox(
-                  width: SizeConfig.horizontal(5),
-                  height: SizeConfig.horizontal(5),
+                  width: SizeConfig.horizontal(widthCircleLoading ?? 5),
+                  height: SizeConfig.horizontal(heightCircleLoading ?? 5),
                   child: const CircularProgressIndicator())
             else
               Column(

@@ -8,6 +8,7 @@ import 'route/app_routes.dart';
 import 'utils/size_config.dart';
 
 Future<void> main() async {
+  
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
       options: const FirebaseOptions(

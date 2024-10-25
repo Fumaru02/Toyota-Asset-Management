@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../controllers/login_controller.dart';
+import '../../../helpers/snackbar.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/assets_list.dart';
+import '../../../utils/enums.dart';
 import '../../../utils/size_config.dart';
 import '../../widgets/custom/custom_flat_button.dart';
 import '../../widgets/custom/custom_text_field.dart';
@@ -47,10 +48,13 @@ class RegisterForm extends StatelessWidget {
   const RegisterForm({
     super.key,
     required this.loginController,
+    this.height,
+    this.width,
   });
 
   final LoginController loginController;
-
+  final double? height;
+  final double? width;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -58,8 +62,8 @@ class RegisterForm extends StatelessWidget {
           color: Colors.white,
           borderRadius:
               BorderRadius.all(Radius.circular(SizeConfig.horizontal(0.5)))),
-      width: SizeConfig.horizontal(38),
-      height: SizeConfig.horizontal(43),
+      width: SizeConfig.horizontal(width ?? 38),
+      height: SizeConfig.horizontal(height ?? 43),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -84,7 +88,11 @@ class RegisterForm extends StatelessWidget {
                 text: 'Login with Google',
                 radius: 0.5,
                 borderColor: AppColors.maroon,
-                onTap: () => loginController.signInWithGoogle()),
+                onTap: () {
+                  // loginController.signInWithGoogle();
+                  Snack.show(SnackbarType.error, 'Information',
+                      'Login feature coming soon');
+                }),
             const SpaceSizer(
               vertical: 5,
             ),
@@ -186,9 +194,13 @@ class LoginForm extends StatelessWidget {
   const LoginForm({
     super.key,
     required this.loginController,
+    this.height,
+    this.width,
   });
 
   final LoginController loginController;
+  final double? height;
+  final double? width;
 
   @override
   Widget build(BuildContext context) {
@@ -197,8 +209,8 @@ class LoginForm extends StatelessWidget {
           color: Colors.white,
           borderRadius:
               BorderRadius.all(Radius.circular(SizeConfig.horizontal(0.5)))),
-      width: SizeConfig.horizontal(38),
-      height: SizeConfig.horizontal(38),
+      width: SizeConfig.horizontal(width ?? 38),
+      height: SizeConfig.horizontal(height ?? 38),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -223,8 +235,11 @@ class LoginForm extends StatelessWidget {
                 text: 'Login with Google',
                 radius: 0.5,
                 borderColor: AppColors.maroon,
-                // onTap: () => loginController.signInWithGoogle(),
-                onTap: () => context.goNamed('dashboard')),
+                onTap: () {
+                  // loginController.signInWithGoogle();
+                  Snack.show(SnackbarType.error, 'Information',
+                      'Login feature coming soon');
+                }),
             const SpaceSizer(
               vertical: 5,
             ),
@@ -273,26 +288,93 @@ class LoginForm extends StatelessWidget {
               child: Align(
                 alignment: Alignment.bottomRight,
                 child: TextButton(
-                    onPressed: () {},
-                    child: RobotoTextView(
-                      value: 'Forgot Password',
-                      size: SizeConfig.safeBlockHorizontal * 1,
-                      color: AppColors.maroon,
+                    onPressed: () => showDialog(
+                        context: context,
+                        builder: (BuildContext context) => Dialog(
+                            child: Container(
+                                width: SizeConfig.horizontal(30),
+                                height: SizeConfig.horizontal(15),
+                                decoration: BoxDecoration(
+                                    color: AppColors.white,
+                                    borderRadius: BorderRadius.all(
+                                        Radius.circular(
+                                            SizeConfig.horizontal(2)))),
+                                child: Column(
+                                  children: <Widget>[
+                                    const SpaceSizer(
+                                      vertical: 2,
+                                    ),
+                                    RobotoTextView(
+                                      value:
+                                          'Please enter a valid email address.',
+                                      size:
+                                          SizeConfig.safeBlockHorizontal * 1.5,
+                                      color: AppColors.black,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    const SpaceSizer(
+                                      vertical: 2,
+                                    ),
+                                    Obx(
+                                      () => CustomTextField(
+                                        title: 'Email',
+                                        focus: loginController.emailFocusNode,
+                                        controller:
+                                            loginController.emailController,
+                                        borderColor:
+                                            loginController.isValidated.value ==
+                                                    false
+                                                ? AppColors.redAlert
+                                                : AppColors.greenSuccess,
+                                        onChanged: (String value) {
+                                          loginController.validateEmail(value);
+                                        },
+                                      ),
+                                    ),
+                                    const SpaceSizer(
+                                      vertical: 2,
+                                    ),
+                                    CustomFlatButton(
+                                        text: 'Send Link to Email',
+                                        radius: 0.5,
+                                        backgroundColor: AppColors.maroon,
+                                        textColor: AppColors.white,
+                                        onTap: () {
+                                          loginController.resetPassword();
+                                        }),
+                                  ],
+                                )))),
+                    child: Center(
+                      child: Padding(
+                        padding:
+                            EdgeInsets.only(left: SizeConfig.horizontal(21)),
+                        child: RobotoTextView(
+                          value: 'Forgot Password',
+                          size: SizeConfig.safeBlockHorizontal * 1,
+                          color: AppColors.maroon,
+                        ),
+                      ),
                     )),
               ),
             ),
             const SpaceSizer(
               vertical: 3,
             ),
-            CustomFlatButton(
-                text: 'Login',
-                radius: 0.5,
-                textColor: AppColors.white,
-                backgroundColor: AppColors.maroon,
-                onTap: () {
-                  loginController.signInWithEmailAndPassword();
-              
-                }),
+            Obx(
+              () => CustomFlatButton(
+                  loading: loginController.isLoading.value,
+                  widthCircleLoading: 2,
+                  heightCircleLoading: 2,
+                  text: 'Login',
+                  radius: 0.5,
+                  textColor: AppColors.white,
+                  backgroundColor: AppColors.maroon,
+                  onTap: () async {
+                    await loginController.signInWithEmailAndPassword();
+                    loginController.emailController.clear();
+                    loginController.passwordController.clear();
+                  }),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[

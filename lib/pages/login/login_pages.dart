@@ -28,8 +28,7 @@ class LoginPages extends StatelessWidget {
               loginController: loginController,
             ),
             mobile: (BuildContext p0) => LoginPagesMobile(
-              focusNodeEmail: loginController.emailFocusNode,
-              focusNodePassword: loginController.passwordFocusNode,
+              loginController: loginController,
             ),
           ),
         ));

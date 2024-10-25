@@ -16,6 +16,7 @@ class StagingDataUser {
     required this.location,
     required this.noAsset,
     required this.pic,
+    required this.year,
   });
   factory StagingDataUser.fromJson(Map<String, dynamic> json) =>
       _$StagingDataUserFromJson(json);
@@ -41,6 +42,9 @@ class StagingDataUser {
   String noAsset;
   @JsonKey(name: 'pic')
   String pic;
+  @JsonKey(name: 'year')
+  String year;
 
   Map<String, dynamic> toJson() => _$StagingDataUserToJson(this);
+
 }

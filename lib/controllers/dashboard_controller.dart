@@ -13,7 +13,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import '../models/get_data_user.dart';
 import '../models/get_list_assets.dart';
 import '../models/staging_data_user.dart';
-import '../pages/dashboard/widgets/dashboard_content.dart';
+import '../pages/dashboard_desktop/widgets/dashboard_content.dart';
 import 'update_sheet_controller.dart';
 
 class DashboardController extends GetxController {
@@ -38,6 +38,7 @@ class DashboardController extends GetxController {
   RxString onChangedDropDownArea = RxString('');
   RxString onChangedDropDownPic = RxString('');
   RxString username = RxString('');
+  RxString userRole = RxString('');
   RxString dropdownInitialArea = RxString('Semua Area');
   RxString dropdownInitialPic = RxString('Semua PIC');
   final RxMap<String, int> picTotals = <String, int>{}.obs;
@@ -123,7 +124,7 @@ class DashboardController extends GetxController {
 
         // Mengambil username
         username.value = data['username'] as String;
-        print('${username.value} test');
+        userRole.value = data['role'] as String;
         getUserAssetStage(username.value);
       } else {
         print('Dokumen tidak ditemukan');
@@ -160,6 +161,7 @@ class DashboardController extends GetxController {
 
   Future<void> getPics(String area) async {
     try {
+      final String modifiedArea = area.toLowerCase();
       final DocumentSnapshot documentSnapshot =
           await _firestore.collection('data').doc('menu_list').get();
 
@@ -173,16 +175,15 @@ class DashboardController extends GetxController {
 
       // Mengambil data area
       final List<dynamic> areaData = data['pic'] as List<dynamic>;
-
       for (final dynamic item in areaData) {
-        if (item is Map<String, dynamic> && item.containsKey(area)) {
-          final dynamic picinArea = item[area];
+        if (item is Map<String, dynamic> && item.containsKey(modifiedArea)) {
+          final dynamic picinArea = item[modifiedArea];
           if (picinArea is List) {
             areaPics.value = picinArea
                 .map((dynamic e) => e.toString().toUpperCase())
                 .toList();
           } else if (picinArea is String) {
-            areaPics.value = <String>[picinArea.toUpperCase()];
+            areaPics.value = <String>[picinArea];
           } else {
             log('Unexpected data type for pic');
           }
@@ -341,7 +342,8 @@ class DashboardController extends GetxController {
     }
 
     allPic.clear();
-    totalPicByArea(date, selectedArea);
+    final String modifiedSelectedArea = selectedArea.toLowerCase();
+    totalPicByArea(date, modifiedSelectedArea);
     final DocumentSnapshot snapshot = await FirebaseFirestore.instance
         .collection('data')
         .doc('checking_asset')
@@ -358,12 +360,12 @@ class DashboardController extends GetxController {
 
           for (final dynamic areaItem in areaList) {
             if (areaItem is Map<String, dynamic> &&
-                areaItem.containsKey(selectedArea)) {
-              log(selectedArea);
+                areaItem.containsKey(modifiedSelectedArea)) {
+              log(modifiedSelectedArea);
 
-              print('Area TLC1 KRW: ${areaItem[selectedArea]}');
-              totalCheckByArea
-                  .add(SalesData('', 1, areaItem[selectedArea] as double));
+              print('Area TLC1 KRW: ${areaItem[modifiedSelectedArea]}');
+              totalCheckByArea.add(
+                  SalesData('', 1, areaItem[modifiedSelectedArea] as double));
               return;
             }
           }
@@ -374,15 +376,12 @@ class DashboardController extends GetxController {
   }
 
   Future<void> totalPicByArea(String date, String area) async {
-    print('$area ini area');
     isLoading.value = true;
     picTotals.clear();
     allPicTotalCheck.clear();
     assetHandled.clear();
 
     final String modifyStringArea = area.toLowerCase().replaceAll(' ', '_');
-
-    print('$modifyStringArea ini area');
 
     if (date == '0/0') {
       date = '$initialMonth/$initialYear';
@@ -501,6 +500,7 @@ class DashboardController extends GetxController {
   Future<void> totalCheckingAsset(String selectedPerson, String date) async {
     isLoading.value = true;
     assetHandled.clear();
+    final String modifiedSelectedPerson = selectedPerson.toLowerCase();
     if (date == '0/0') {
       date = '$initialMonth/$initialYear';
     }
@@ -524,10 +524,10 @@ class DashboardController extends GetxController {
             for (final dynamic picItem in picList) {
               if (picItem is Map<String, dynamic>) {}
               if (picItem is Map<String, dynamic> &&
-                  picItem.containsKey(selectedPerson)) {
+                  picItem.containsKey(modifiedSelectedPerson)) {
                 final List<dynamic> locations =
-                    picItem[selectedPerson] as List<dynamic>;
-                print('$selectedPerson:');
+                    picItem[modifiedSelectedPerson] as List<dynamic>;
+                print('$modifiedSelectedPerson:');
                 for (final dynamic location in locations) {
                   if (location is Map<String, dynamic>) {
                     location.forEach((String locationName, dynamic value) {
@@ -661,6 +661,9 @@ class DashboardController extends GetxController {
     sunter1.value = 0;
 
     final List<dynamic> assets = data['list_assets'] as List<dynamic>;
+    if (assets.isEmpty) {
+      return;
+    }
     for (final dynamic asset in assets) {
       if (asset is Map) {
         if (asset['area'] == 'tlc1 krw') {
@@ -721,6 +724,7 @@ class DashboardController extends GetxController {
               'location_value': PlutoCell(value: data.location),
               'area_value': PlutoCell(value: data.area.toUpperCase()),
               'koordinator_value': PlutoCell(value: data.coordinator),
+              'year_field': PlutoCell(value: data.year),
             },
           ),
         )
@@ -741,9 +745,9 @@ class DashboardController extends GetxController {
         .toList();
   }
 
-  List<PlutoRow> convertToStagingTabel(List<StagingDataUser> users) {
+  List<PlutoRow> convertToStagingTabel(List<dynamic> users) {
     return users
-        .map((StagingDataUser data) => PlutoRow(
+        .map((dynamic data) => PlutoRow(
               cells: <String, PlutoCell>{
                 'asset_name': PlutoCell(value: data.assetName),
                 'area_field': PlutoCell(value: data.area),
@@ -755,9 +759,75 @@ class DashboardController extends GetxController {
                 'location_field': PlutoCell(value: data.location),
                 'no_asset': PlutoCell(value: data.noAsset),
                 'pic_field': PlutoCell(value: data.pic),
+                'year_field': PlutoCell(value: data.year),
               },
             ))
         .toList();
+  }
+
+  Future<void> deleteDataAfterUploading(String name) async {
+    try {
+      print('Starting getUserAssetStage for user: $name');
+      isLoading.value = true;
+
+      if (name.isEmpty) {
+        print('Error: Username is empty');
+        return;
+      }
+
+      final DocumentSnapshot<Map<String, dynamic>> docSnapshot =
+          await _firestore.collection('admin_permission').doc(name).get();
+
+      print('Document exists: ${docSnapshot.exists}');
+      print('Document data: ${docSnapshot.data()}');
+
+      if (docSnapshot.exists && docSnapshot.data() != null) {
+        final Map<String, dynamic> data = docSnapshot.data()!;
+        if (data['staging_list_assets'] is List) {
+          final List<dynamic> assets =
+              data['staging_list_assets'] as List<dynamic>;
+          print('Raw assets data: $assets');
+
+          stagingData.value = assets
+              .map((asset) =>
+                  StagingDataUser.fromJson(asset as Map<String, dynamic>))
+              .toList();
+
+          print('Staging data length: ${stagingData.length}');
+
+          rowsStagingData.value = convertToStagingTabel(stagingData);
+          print('Converted rows length: ${rowsStagingData.length}');
+
+          // Hapus data stagelist dari Firebase
+          await _firestore
+              .collection('staging_data')
+              .doc(name)
+              .update(<Object, Object?>{
+            'staging_list_assets': FieldValue.delete(),
+          });
+          print('Staging list data deleted from Firebase');
+        } else {
+          print('staging_list_assets is not a List or is null');
+          stagingData.clear();
+          rowsStagingData.clear();
+        }
+      } else {
+        print('No data found for user: $name');
+        stagingData.clear();
+        rowsStagingData.clear();
+      }
+      Get.back();
+    } catch (e, stackTrace) {
+      print('Error fetching or deleting data: $e');
+      print('Stack trace: $stackTrace');
+      stagingData.clear();
+      rowsStagingData.clear();
+    } finally {
+      isLoading.value = false;
+      update();
+      print(
+          'getUserAssetStage completed. Final staging data length: ${stagingData.length}');
+    }
   }
 
   Future<void> updateUserRole(String username, String newRole) async {
@@ -789,6 +859,36 @@ class DashboardController extends GetxController {
     } catch (e) {
       print('Error fetching data: $e');
     }
+  }
+
+  Stream<List<dynamic>> streamRowUpdateSheet(String name) {
+    return FirebaseFirestore.instance
+        .collection('staging_data')
+        .doc(name)
+        .snapshots()
+        .map((DocumentSnapshot<Map<String, dynamic>> docSnapshot) {
+      if (docSnapshot.exists && docSnapshot.data() != null) {
+        final Map<String, dynamic> data = docSnapshot.data()!;
+        if (data['staging_list_assets'] is List) {
+          final List<dynamic> assets =
+              data['staging_list_assets'] as List<dynamic>;
+          return assets
+              .map((asset) =>
+                  StagingDataUser.fromJson(asset as Map<String, dynamic>))
+              .toList();
+        } else {
+          print('staging_list_assets is not a List or is null');
+          return <dynamic>[];
+        }
+      } else {
+        print('No data found for user: $name');
+        return <dynamic>[];
+      }
+    }).handleError((dynamic error, dynamic stackTrace) {
+      print('Error fetching data: $error');
+      print('Stack trace: $stackTrace');
+      return <dynamic>[];
+    });
   }
 
   Future<void> getUserAssetStage(String name) async {

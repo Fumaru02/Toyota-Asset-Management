@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
@@ -11,9 +12,11 @@ import 'package:get/get.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:pluto_grid/pluto_grid.dart';
 import 'package:universal_io/io.dart';
 
 import '../helpers/snackbar.dart';
+import '../models/staging_data_user.dart';
 import '../utils/enums.dart';
 
 class UpdateSheetController extends GetxController {
@@ -28,9 +31,11 @@ class UpdateSheetController extends GetxController {
   RxString dropdownInitialArea = RxString('Area');
   RxString dropdownInitialPIC = RxString('PIC');
   RxString dropdownInitialCoordinator = RxString('PIC');
-  final RxList<String> areaPics = <String>[].obs;
+  final RxList<String> areaPicsUpdate = <String>[].obs;
   final RxList<String> areaLocation = <String>[].obs;
+  final RxList<String> coordinatorLocation = <String>[].obs;
   RxString imageUrl = RxString('');
+  RxString noAssetUpdate = RxString('');
   Rx<Uint8List?> previewImageBytes = Rx<Uint8List?>(null);
   Rx<Uint8List?> imageAsset = Rx<Uint8List?>(null);
   RxString onChangedDropDownForm = RxString('');
@@ -39,6 +44,7 @@ class UpdateSheetController extends GetxController {
   RxString onChangedDropDownCoordinator = RxString('');
   RxString onChangedDropDownCategory = RxString('');
   RxString initialDropDownForm = RxString('');
+  RxString initialDropDownFormCoordinator = RxString('');
   RxString areaValue = RxString('');
   RxString picValue = RxString('');
   RxString coordinatorValue = RxString('');
@@ -46,6 +52,7 @@ class UpdateSheetController extends GetxController {
   RxString locationValue = RxString('');
   RxString formattedTime = RxString('');
   RxBool isLoading = RxBool(false);
+  late PlutoGridStateManager stateManager;
 
   RxInt year = RxInt(0);
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -69,8 +76,8 @@ class UpdateSheetController extends GetxController {
             (data['staging_list_assets'] as List<dynamic>?) ?? <dynamic>[];
 
         // Find the index of the asset to update
-        final int indexToUpdate =
-            stagingListAssets.indexWhere((asset) => asset['id'] == 4);
+        final int indexToUpdate = stagingListAssets
+            .indexWhere((asset) => asset['no_asset'] == noAssetUpdate.value);
 
         if (indexToUpdate != -1) {
           // Update only the image field of the asset
@@ -107,16 +114,83 @@ class UpdateSheetController extends GetxController {
       await docRef.set(<String, FieldValue>{
         'staging_list_assets': FieldValue.arrayUnion(<dynamic>[assetData])
       }, SetOptions(merge: true));
+      Get.back();
       Snack.show(SnackbarType.success, 'Sukses',
-          'Data asset berhasil ditambahkan atau diperbarui');
+          'Data asset berhasil ditambahkan atau diperbarui mohon refresh page jika diperlukan');
     } catch (e) {
+      Get.back();
       Get.snackbar('Error', 'Gagal menambahkan atau memperbarui data: $e');
     }
   }
 
+  Future<void> sendDataToAdmin(dynamic assetData, String username) async {
+    try {
+      final User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
+
+      final DocumentReference docRef = FirebaseFirestore.instance
+          .collection('admin_permission')
+          .doc(username);
+
+      // Konversi Rx<List> ke List jika perlu
+      final List<dynamic> dataList =
+          assetData is RxList ? assetData.toList() : assetData as List<dynamic>;
+
+      // Konversi setiap StagingDataUser menjadi Map<String, dynamic> menggunakan JSON
+      final List<Map<String, dynamic>> dataToSend = dataList.map((item) {
+        if (item is StagingDataUser) {
+          // Konversi ke JSON string, lalu parse kembali ke Map
+          final String jsonString = jsonEncode(item.toJson());
+          return jsonDecode(jsonString) as Map<String, dynamic>;
+        } else if (item is Map) {
+          // Jika sudah Map, tetap lakukan proses yang sama untuk memastikan
+          final String jsonString = jsonEncode(item);
+          return jsonDecode(jsonString) as Map<String, dynamic>;
+        } else {
+          throw Exception('Unsupported data type in list');
+        }
+      }).toList();
+
+      // Periksa apakah dokumen sudah ada
+      final DocumentSnapshot<Object?> docSnapshot = await docRef.get();
+      if (docSnapshot.exists) {
+        // Dokumen ada, update data yang ada
+        await docRef.update(<Object, Object?>{
+          'staging_list_assets': FieldValue.arrayUnion(dataToSend)
+        });
+      } else {
+        // Dokumen tidak ada, buat baru
+        await docRef.set(<String, List<Map<String, dynamic>>>{
+          'staging_list_assets': dataToSend
+        });
+      }
+      Get.back();
+      Get.snackbar('Sukses', 'Data asset berhasil dikirim');
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal menambahkan atau memperbarui data: $e');
+      print('Error detail: $e'); // Untuk debugging
+    }
+  }
+
   Future<void> onConfirmAddAsset(String noAsset, double id, bool isCheck,
-      String assetName, String username) async {
+      String assetName, String username, String year) async {
     isLoading.value = true;
+
+    if (noAsset == '' ||
+        assetName == '' ||
+        username == '' ||
+        year == '0' ||
+        areaValue.value.isEmpty ||
+        categoryValue.value.isEmpty ||
+        picValue.value.isEmpty) {
+      Snack.show(SnackbarType.error, 'Error',
+          'Data asset gagal di kirim periksa kembali input form');
+      Get.back();
+      isLoading.value = false;
+      return;
+    }
     final DateTime now = DateTime.now();
     formattedTime.value = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
 
@@ -125,7 +199,7 @@ class UpdateSheetController extends GetxController {
     addOrUpdateAsset(
       <String, dynamic>{
         'input_time': formattedTime.value,
-        'area': areaValue.value,
+        'area': areaValue.value.toLowerCase(),
         'image': imageUrl.value,
         'category': categoryValue.value,
         'coordinator': coordinatorValue.value,
@@ -133,8 +207,9 @@ class UpdateSheetController extends GetxController {
         'id': id,
         'is_check': isCheck,
         'pic': picValue.value,
-        'location': locationValue.value,
-        'asset_name': assetName
+        'location': locationValue.value.toUpperCase(),
+        'asset_name': assetName.toUpperCase(),
+        'year': year
       },
       username,
     );
@@ -163,10 +238,10 @@ class UpdateSheetController extends GetxController {
         if (item is Map<String, dynamic> && item.containsKey(modifiedArea)) {
           final dynamic picinArea = item[modifiedArea];
           if (picinArea is List) {
-            areaPics.value =
+            areaPicsUpdate.value =
                 picinArea.map((dynamic e) => e.toString()).toList();
           } else if (picinArea is String) {
-            areaPics.value = <String>[picinArea];
+            areaPicsUpdate.value = <String>[picinArea];
           } else {
             log('Unexpected data type for pic');
           }
@@ -174,7 +249,83 @@ class UpdateSheetController extends GetxController {
         }
       }
 
-      print('Area PICs: ${areaPics.join(', ')}');
+      print('Area PICs: ${areaPicsUpdate.join(', ')}');
+      update();
+    } catch (e) {
+      log('Error retrieving data: $e');
+    }
+  }
+
+  Future<void> removeAssetFromStaging(
+      String username, String assetNumber) async {
+    try {
+      // Referensi ke dokumen pengguna
+      final DocumentReference<Map<String, dynamic>> docRef =
+          _firestore.collection('staging_data').doc(username);
+
+      // Mengambil data pengguna
+      final DocumentSnapshot<Map<String, dynamic>> docSnapshot =
+          await docRef.get();
+      if (!docSnapshot.exists || docSnapshot.data() == null) {
+        print('Dokumen tidak ditemukan untuk pengguna: $username');
+        return;
+      }
+
+      // Mendapatkan data staging_list_assets
+      final Map<String, dynamic> data = docSnapshot.data()!;
+      final List<dynamic> stagingListAssets =
+          data['staging_list_assets'] as List<dynamic>;
+
+      // Mencari dan menghapus asset berdasarkan nomor asset
+      stagingListAssets.removeWhere((asset) =>
+          asset is Map<String, dynamic> && asset['no_asset'] == assetNumber);
+
+      // Memperbarui dokumen dengan list yang telah diperbarui
+      await docRef
+          .update(<Object, Object?>{'staging_list_assets': stagingListAssets});
+
+      print('Asset dengan nomor $assetNumber telah dihapus dari staging');
+
+      // Memperbarui data lokal
+    } catch (e) {
+      print('Error saat menghapus asset dari staging: $e');
+    }
+  }
+
+  Future<void> getCoordinatorArea(String area) async {
+    final String modifiedArea = area.toLowerCase();
+    try {
+      final DocumentSnapshot documentSnapshot =
+          await _firestore.collection('data').doc('menu_list').get();
+
+      if (!documentSnapshot.exists) {
+        log('Document does not exist');
+        return;
+      }
+
+      final Map<String, dynamic> data =
+          documentSnapshot.data()! as Map<String, dynamic>;
+
+      // Mengambil data area
+      final List<dynamic> dropdownData = data['coordinator'] as List<dynamic>;
+
+      for (final dynamic item in dropdownData) {
+        if (item is Map<String, dynamic> && item.containsKey(modifiedArea)) {
+          final dynamic coordinatorArea = item[modifiedArea];
+          if (coordinatorArea is List) {
+            coordinatorLocation.value = coordinatorArea
+                .map((dynamic e) => e.toString().toUpperCase())
+                .toList();
+          } else if (coordinatorArea is String) {
+            areaLocation.value = <String>[coordinatorArea];
+          } else {
+            log('Unexpected data type for pic');
+          }
+          break;
+        }
+      }
+
+      print('Coordinator Locations: ${areaLocation.join(', ')}');
       update();
     } catch (e) {
       log('Error retrieving data: $e');
@@ -222,11 +373,14 @@ class UpdateSheetController extends GetxController {
 
   Future<void> pickImage(
       ImageSource source, bool isUpdate, String username) async {
+    final DateTime now = DateTime.now();
+    final String formattedTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
     try {
       isLoading.value = true;
       final XFile? image = await ImagePicker().pickImage(source: source);
       if (image == null) {
         Snack.show(SnackbarType.error, 'Information', 'Failed to pick image');
+        isLoading.value = false;
         return;
       }
       // Baca gambar sebagai bytes
@@ -239,13 +393,15 @@ class UpdateSheetController extends GetxController {
       if (isUpdate == true) {
         if (username != null) {
           await uploadImage(
-              imageAsset.value!, '${formattedTime.value}_compressed_edit.jpg');
-
-          log('testP ${imageUrl.value}');
-          updateImageAsset(username, imageUrl.value);
+              imageAsset.value!, '${formattedTime}_compressed_edit.jpg');
+          updateImageAsset(
+            username,
+            imageUrl.value,
+          );
         }
       }
       isLoading.value = false;
+      update();
     } catch (e) {
       Snack.show(SnackbarType.error, 'Error', 'Failed to pick image: $e');
     }
@@ -278,18 +434,20 @@ class UpdateSheetController extends GetxController {
   }
 
   Future<void> uploadImage(Uint8List imageData, String fileName) async {
+    final DateTime now = DateTime.now();
+    final String monthPickedImage = DateFormat('MM').format(now);
     final SettableMetadata metadata =
         SettableMetadata(contentType: 'image/jpeg');
     final Reference ref = firebaseStorage
         .ref('sheet')
         .child('sheet_image')
-        .child('test')
+        .child(monthPickedImage)
         .child(fileName);
 
     await ref.putData(imageData, metadata);
     final String url = await ref.getDownloadURL();
     Snack.show(SnackbarType.success, 'Image',
-        'Image has been uploaded. Image will be replaced after pressing Submit');
+        'Image berhasil di tambahkan mohon refresh jika image tidak terupdate');
     imageUrl.value = url;
     update();
   }
@@ -325,5 +483,45 @@ class UpdateSheetController extends GetxController {
       }
     }
     update();
+  }
+
+  Future<void> updateTableUpdateSheet(String fieldName, String username,
+      String newValue, String noAsset) async {
+    try {
+      // 1. Ambil dokumen saat ini
+      final DocumentReference userDoc =
+          FirebaseFirestore.instance.collection('staging_data').doc(username);
+
+      // Get the current document data
+      final DocumentSnapshot docSnapshot = await userDoc.get();
+      if (docSnapshot.exists) {
+        // Explicitly cast the data to Map<String, dynamic>
+        final Map<String, dynamic> data =
+            docSnapshot.data()! as Map<String, dynamic>;
+
+        // Safely get the staging_list_assets and ensure it's a List<dynamic>
+        final List<dynamic> stagingListAssets =
+            (data['staging_list_assets'] as List<dynamic>?) ?? <dynamic>[];
+
+        // 2. Temukan indeks elemen yang ingin diupdate
+        // Asumsikan kita ingin update berdasarkan asset_name yang sama
+        final int indexToUpdate = stagingListAssets
+            .indexWhere((asset) => asset['no_asset'] == noAssetUpdate.value);
+        if (indexToUpdate != -1) {
+          // Update only the image field of the asset
+          stagingListAssets[indexToUpdate][fieldName] = newValue;
+
+          // Update the document with the modified list
+          await userDoc.update(<Object, Object?>{
+            'staging_list_assets': stagingListAssets,
+          });
+
+          print('Asset updated successfully');
+          update();
+        }
+      }
+    } catch (e) {
+      print('Error updating asset: $e');
+    }
   }
 }
