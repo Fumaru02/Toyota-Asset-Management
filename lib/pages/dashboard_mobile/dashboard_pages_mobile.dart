@@ -12,7 +12,7 @@ import '../dashboard_desktop/widgets/tabel_check_sheet_content.dart';
 import '../widgets/custom/custom_flat_button.dart';
 import '../widgets/layout/space_sizer.dart';
 import '../widgets/text/roboto_text_view.dart';
-import 'admin_panel.mobile.dart';
+import 'admin_panel_mobile.dart';
 import 'update_sheet_mobile.dart';
 import 'widgets/dashboard_content_mobile.dart';
 

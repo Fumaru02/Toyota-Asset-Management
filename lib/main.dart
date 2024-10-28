@@ -37,7 +37,7 @@ class AssetManagement extends StatelessWidget {
       routerDelegate: router.routerDelegate,
       routeInformationParser: router.routeInformationParser,
       routeInformationProvider: router.routeInformationProvider,
-      localizationsDelegates: const <LocalizationsDelegate>[
+      localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
         GlobalMaterialLocalizations.delegate,
         MonthYearPickerLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,

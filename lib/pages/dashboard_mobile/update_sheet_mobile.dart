@@ -93,28 +93,47 @@ class UpdateSheetMobile extends StatelessWidget {
                                     const SpaceSizer(
                                       vertical: 1,
                                     ),
-                                    Padding(
-                                      padding: EdgeInsets.all(
-                                          SizeConfig.horizontal(1)),
-                                      child: Container(
-                                        padding: EdgeInsets.all(
-                                            SizeConfig.horizontal(1)),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(
-                                                  SizeConfig.horizontal(1))),
-                                          color: AppColors.yellowWarning,
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        const Spacer(),
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              left: SizeConfig.horizontal(12)),
+                                          child: Container(
+                                            padding: EdgeInsets.all(
+                                                SizeConfig.horizontal(1)),
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(
+                                                      SizeConfig.horizontal(
+                                                          1))),
+                                              color: AppColors.yellowWarning,
+                                            ),
+                                            width: SizeConfig.horizontal(50),
+                                            child: RobotoTextView(
+                                              alignText: AlignTextType.justify,
+                                              fontWeight: FontWeight.w600,
+                                              value:
+                                                  'Mohon lengkapi form data yang valid sesuai aktual dengan benar.',
+                                              size: SizeConfig
+                                                      .safeBlockHorizontal *
+                                                  3,
+                                            ),
+                                          ),
                                         ),
-                                        width: SizeConfig.horizontal(50),
-                                        child: RobotoTextView(
-                                          alignText: AlignTextType.justify,
-                                          fontWeight: FontWeight.w600,
-                                          value:
-                                              'Mohon lengkapi form data yang valid sesuai aktual dengan benar.',
-                                          size: SizeConfig.safeBlockHorizontal *
-                                              3,
-                                        ),
-                                      ),
+                                        const Spacer(),
+                                        IconButton(
+                                          onPressed: () {
+                                            Get.back();
+                                          },
+                                          icon: const Icon(Icons.close),
+                                          iconSize:
+                                              SizeConfig.safeBlockHorizontal *
+                                                  6,
+                                        )
+                                      ],
                                     ),
                                     CustomTextField(
                                       controller: updateSheetController
@@ -363,8 +382,86 @@ class UpdateSheetMobile extends StatelessWidget {
                                       CustomRippleButton(
                                         borderRadius: BorderRadius.zero,
                                         onTap: () async {
-                                          await updateSheetController.pickImage(
-                                              ImageSource.gallery, false, '');
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) =>
+                                                Dialog(
+                                              child: SizedBox(
+                                                width:
+                                                    SizeConfig.horizontal(40),
+                                                height:
+                                                    SizeConfig.horizontal(30),
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: <Widget>[
+                                                    RobotoTextView(
+                                                      value:
+                                                          'Pilihan pengambilan gambar',
+                                                      size: SizeConfig
+                                                              .safeBlockHorizontal *
+                                                          3,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: AppColors.black,
+                                                    ),
+                                                    const SpaceSizer(
+                                                      vertical: 3,
+                                                    ),
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceAround,
+                                                      children: <Widget>[
+                                                        CustomFlatButton(
+                                                            width: 20,
+                                                            height: 5,
+                                                            backgroundColor:
+                                                                AppColors
+                                                                    .maroon,
+                                                            textColor:
+                                                                AppColors.white,
+                                                            text: 'Gallery',
+                                                            textSize: SizeConfig
+                                                                    .safeBlockHorizontal *
+                                                                3,
+                                                            onTap: () async {
+                                                              await updateSheetController
+                                                                  .pickImage(
+                                                                      ImageSource
+                                                                          .gallery,
+                                                                      false,
+                                                                      '');
+                                                              Get.back();
+                                                            }),
+                                                        CustomFlatButton(
+                                                            width: 20,
+                                                            height: 5,
+                                                            backgroundColor:
+                                                                AppColors
+                                                                    .maroon,
+                                                            textColor:
+                                                                AppColors.white,
+                                                            text: 'Camera',
+                                                            textSize: SizeConfig
+                                                                    .safeBlockHorizontal *
+                                                                3,
+                                                            onTap: () async {
+                                                              await updateSheetController
+                                                                  .pickImage(
+                                                                      ImageSource
+                                                                          .camera,
+                                                                      false,
+                                                                      '');
+                                                              Get.back();
+                                                            }),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          );
                                         },
                                         child: Container(
                                           width: SizeConfig.horizontal(60),
@@ -457,6 +554,37 @@ class UpdateSheetMobile extends StatelessWidget {
                                                     dashboardController
                                                         .username.value);
                                             Get.back();
+                                            updateSheetController
+                                                .assetNameTextEditingController
+                                                .clear();
+                                            updateSheetController
+                                                .noAssetTextEditingController
+                                                .clear();
+                                            updateSheetController
+                                                    .onChangedDropDownForm
+                                                    .value =
+                                                updateSheetController
+                                                    .dropdownInitialArea.value;
+                                            updateSheetController
+                                                    .onChangedDropDownPIC
+                                                    .value =
+                                                updateSheetController
+                                                    .dropdownInitialPIC.value;
+                                            updateSheetController
+                                                    .onChangedDropDownCategory
+                                                    .value =
+                                                updateSheetController
+                                                    .initialDropDownForm.value;
+                                            updateSheetController
+                                                    .onChangedDropDownLocation
+                                                    .value =
+                                                updateSheetController
+                                                    .initialDropDownForm.value;
+
+                                            updateSheetController.year.value =
+                                                0;
+                                            updateSheetController
+                                                .previewImageBytes.value = null;
                                           }),
                                   ],
                                 ),
@@ -516,15 +644,20 @@ class UpdateSheetMobile extends StatelessWidget {
                                     textSize:
                                         SizeConfig.safeBlockHorizontal * 3,
                                     onTap: () async {
-                                      await updateSheetController
-                                          .sendDataToAdmin(
-                                              dashboardController.stagingData,
-                                              dashboardController
-                                                  .username.value);
-                                      await dashboardController
-                                          .deleteDataAfterUploading(
-                                              dashboardController
-                                                  .username.value);
+                                      if (dashboardController
+                                          .stagingData.isNotEmpty) {
+                                        await updateSheetController
+                                            .sendDataToAdmin(
+                                                dashboardController.stagingData,
+                                                dashboardController
+                                                    .username.value);
+                                        await dashboardController
+                                            .deleteDataAfterUploading(
+                                                dashboardController
+                                                    .username.value);
+                                      } else {
+                                        return;
+                                      }
                                     }),
                                 CustomFlatButton(
                                   width: 20,

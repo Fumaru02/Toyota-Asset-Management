@@ -167,12 +167,14 @@ class DashboardContentMobile extends StatelessWidget {
                             dashboardController.onChangedDropDownArea.value ==
                                 'Semua Area')
                           GrapichAllArea(
+                            fontSize: SizeConfig.safeBlockHorizontal * 3,
                             dashboardController: dashboardController,
                             height: 50,
                             width: 200,
                           )
                         else
                           GrapichSelectedArea(
+                              fontSize: SizeConfig.safeBlockHorizontal * 3,
                               height: 50,
                               width: 100,
                               dashboardController: dashboardController),
@@ -202,11 +204,15 @@ class DashboardContentMobile extends StatelessWidget {
                                             .onChangedDropDownPic.value ==
                                         'Semua PIC')
                                   GraphPIC(
+                                      fontSize:
+                                          SizeConfig.safeBlockHorizontal * 3,
                                       height: 50,
                                       width: 100,
                                       dashboardController: dashboardController)
                                 else
                                   GrapichSelectedPIC(
+                                      fontSize:
+                                          SizeConfig.safeBlockHorizontal * 3,
                                       height: 50,
                                       width: 100,
                                       dashboardController: dashboardController),
@@ -221,7 +227,6 @@ class DashboardContentMobile extends StatelessWidget {
               ])),
     );
   }
-// ... (kode lainnya tetap sama)
 }
 
 class SalesData {

@@ -88,22 +88,19 @@ class _TabelUpdateContentMobileState extends State<TabelUpdateContentMobile> {
       titleTextAlign: PlutoColumnTextAlign.center,
       backgroundColor: AppColors.maroon,
       renderer: (PlutoColumnRendererContext rendererContext) {
-        return Row(
-          children: <Widget>[
-            CustomFlatButton(
-              backgroundColor: AppColors.maroon,
-              textColor: AppColors.white,
-              width: SizeConfig.horizontal(0.5),
-              height: SizeConfig.horizontal(0.5),
-              text: 'Delete',
-              onTap: () {
-                final String deletedAseetNumber =
-                    rendererContext.row.cells['no_asset']?.value as String;
-                updateSheetController.removeAssetFromStaging(
-                    dashboardController.username.value, deletedAseetNumber);
-              },
-            ),
-          ],
+        return CustomFlatButton(
+          backgroundColor: AppColors.maroon,
+          textColor: AppColors.white,
+          width: SizeConfig.horizontal(8),
+          textSize: SizeConfig.safeBlockHorizontal * 3,
+          height: SizeConfig.horizontal(2),
+          text: 'Delete',
+          onTap: () {
+            final String deletedAseetNumber =
+                rendererContext.row.cells['no_asset']?.value as String;
+            updateSheetController.removeAssetFromStaging(
+                dashboardController.username.value, deletedAseetNumber);
+          },
         );
       },
       titleSpan: WidgetSpan(

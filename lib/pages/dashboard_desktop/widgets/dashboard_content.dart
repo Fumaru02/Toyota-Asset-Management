@@ -32,7 +32,7 @@ class DashboardContent extends StatelessWidget {
                     children: <Widget>[
                       RobotoTextView(
                         value: 'Pages /',
-                        size: SizeConfig.safeBlockHorizontal * 1.5,
+                        size: SizeConfig.safeBlockHorizontal * 1,
                         color: AppColors.grey,
                       ),
                       const SpaceSizer(
@@ -46,7 +46,7 @@ class DashboardContent extends StatelessWidget {
                         padding: EdgeInsets.all(SizeConfig.horizontal(0.4)),
                         child: RobotoTextView(
                           value: 'Dashboard',
-                          size: SizeConfig.safeBlockHorizontal * 1.5,
+                          size: SizeConfig.safeBlockHorizontal * 1,
                           fontWeight: FontWeight.bold,
                           color: AppColors.white,
                         ),
@@ -204,11 +204,13 @@ class GrapichSelectedPIC extends StatelessWidget {
     required this.dashboardController,
     this.height,
     this.width,
+    this.fontSize,
   });
 
   final DashboardController dashboardController;
   final double? height;
   final double? width;
+  final double? fontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -230,7 +232,10 @@ class GrapichSelectedPIC extends StatelessWidget {
               //lanjutdisini
               title: ChartTitle(
                   text:
-                      'Status check by PIC [${dashboardController.onChangedDropDownPic.value}] ${dashboardController.monthByName} ${dashboardController.year.value == 0 ? '' : dashboardController.year}'),
+                      'Status check by PIC [${dashboardController.onChangedDropDownPic.value}] ${dashboardController.monthByName} ${dashboardController.year.value == 0 ? '' : dashboardController.year}',
+                  textStyle: TextStyle(
+                      fontSize:
+                          fontSize ?? SizeConfig.safeBlockHorizontal * 1)),
               legend: const Legend(isVisible: true),
               tooltipBehavior: dashboardController.tooltipBehavior,
               series: <ColumnSeries<SalesData, int>>[
@@ -243,7 +248,8 @@ class GrapichSelectedPIC extends StatelessWidget {
                   dataLabelSettings: DataLabelSettings(
                     isVisible: true,
                     textStyle: TextStyle(
-                        fontSize: SizeConfig.safeBlockHorizontal * 0.8),
+                        fontSize:
+                            fontSize ?? SizeConfig.safeBlockHorizontal * 0.8),
                   ),
                   width: 1,
                 ),
@@ -255,7 +261,8 @@ class GrapichSelectedPIC extends StatelessWidget {
                   yValueMapper: (SalesData sales, _) => sales.sales,
                   dataLabelSettings: DataLabelSettings(
                     textStyle: TextStyle(
-                        fontSize: SizeConfig.safeBlockHorizontal * 0.8),
+                        fontSize:
+                            fontSize ?? SizeConfig.safeBlockHorizontal * 0.8),
                     isVisible: true,
                   ),
                   width: 1,
@@ -273,11 +280,13 @@ class GrapichSelectedArea extends StatelessWidget {
     required this.dashboardController,
     this.height,
     this.width,
+    this.fontSize,
   });
 
   final DashboardController dashboardController;
   final double? height;
   final double? width;
+  final double? fontSize;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -302,7 +311,9 @@ class GrapichSelectedArea extends StatelessWidget {
             ),
             title: ChartTitle(
                 text:
-                    'Status check ${dashboardController.onChangedDropDownArea.value}'),
+                    'Status check ${dashboardController.onChangedDropDownArea.value}',
+                textStyle: TextStyle(
+                    fontSize: fontSize ?? SizeConfig.safeBlockHorizontal * 1)),
             legend: const Legend(isVisible: true),
             tooltipBehavior: dashboardController.tooltipBehavior,
             series: <ColumnSeries<SalesData, int>>[
@@ -320,8 +331,9 @@ class GrapichSelectedArea extends StatelessWidget {
                 yValueMapper: (SalesData sales, _) => sales.sales,
                 dataLabelSettings: DataLabelSettings(
                   isVisible: true,
-                  textStyle:
-                      TextStyle(fontSize: SizeConfig.safeBlockHorizontal * 0.8),
+                  textStyle: TextStyle(
+                      fontSize:
+                          fontSize ?? SizeConfig.safeBlockHorizontal * 0.8),
                 ),
                 width: 1,
               ),
@@ -339,8 +351,9 @@ class GrapichSelectedArea extends StatelessWidget {
                 xValueMapper: (SalesData sales, _) => sales.month,
                 yValueMapper: (SalesData sales, _) => sales.sales,
                 dataLabelSettings: DataLabelSettings(
-                  textStyle:
-                      TextStyle(fontSize: SizeConfig.safeBlockHorizontal * 0.8),
+                  textStyle: TextStyle(
+                      fontSize:
+                          fontSize ?? SizeConfig.safeBlockHorizontal * 0.8),
                   isVisible: true,
                 ),
                 width: 1,
@@ -357,11 +370,13 @@ class GrapichAllArea extends StatelessWidget {
     required this.dashboardController,
     this.height,
     this.width,
+    this.fontSize,
   });
 
   final DashboardController dashboardController;
   final double? height;
   final double? width;
+  final double? fontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -400,7 +415,10 @@ class GrapichAllArea extends StatelessWidget {
             ),
 
             // Chart title
-            title: const ChartTitle(text: 'Status check all Area'),
+            title: ChartTitle(
+                text: 'Status check all Area',
+                textStyle: TextStyle(
+                    fontSize: fontSize ?? SizeConfig.safeBlockHorizontal * 1)),
             // Enable legend
             legend: const Legend(isVisible: true),
 
@@ -410,6 +428,7 @@ class GrapichAllArea extends StatelessWidget {
               ColumnSeries<SalesData, int>(
                 name: 'Total Asset',
                 spacing: 0.1,
+
                 dataSource: <SalesData>[
                   SalesData(
                     'TLC1 KRW',
@@ -447,8 +466,9 @@ class GrapichAllArea extends StatelessWidget {
                 // Enable data label
                 dataLabelSettings: DataLabelSettings(
                   isVisible: true,
-                  textStyle:
-                      TextStyle(fontSize: SizeConfig.safeBlockHorizontal * 0.8),
+                  textStyle: TextStyle(
+                      fontSize:
+                          fontSize ?? SizeConfig.safeBlockHorizontal * 0.8),
                 ),
                 // Set column width and spacing
                 width: 0.4,
@@ -492,8 +512,9 @@ class GrapichAllArea extends StatelessWidget {
                 yValueMapper: (SalesData sales, _) => sales.sales,
                 // Enable data label
                 dataLabelSettings: DataLabelSettings(
-                  textStyle:
-                      TextStyle(fontSize: SizeConfig.safeBlockHorizontal * 0.8),
+                  textStyle: TextStyle(
+                      fontSize:
+                          fontSize ?? SizeConfig.safeBlockHorizontal * 0.8),
                   isVisible: true,
                 ),
                 // Set column width and spacing
@@ -504,12 +525,18 @@ class GrapichAllArea extends StatelessWidget {
 }
 
 class GraphPIC extends StatelessWidget {
-  const GraphPIC(
-      {super.key, required this.dashboardController, this.height, this.width});
+  const GraphPIC({
+    super.key,
+    required this.dashboardController,
+    this.height,
+    this.width,
+    this.fontSize,
+  });
 
   final DashboardController dashboardController;
   final double? height;
   final double? width;
+  final double? fontSize;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -528,7 +555,10 @@ class GraphPIC extends StatelessWidget {
             ),
 
             // Chart title
-            title: const ChartTitle(text: 'Status check by PIC'),
+            title: ChartTitle(
+                text: 'Status check by PIC',
+                textStyle: TextStyle(
+                    fontSize: fontSize ?? SizeConfig.safeBlockHorizontal * 1)),
             // Enable legend
             legend: const Legend(isVisible: true),
 
@@ -544,8 +574,9 @@ class GraphPIC extends StatelessWidget {
                 // Enable data label
                 dataLabelSettings: DataLabelSettings(
                   isVisible: true,
-                  textStyle:
-                      TextStyle(fontSize: SizeConfig.safeBlockHorizontal * 0.7),
+                  textStyle: TextStyle(
+                      fontSize:
+                          fontSize ?? SizeConfig.safeBlockHorizontal * 0.7),
                 ),
                 // Set column width and spacing
                 width: 0.4,
@@ -558,8 +589,9 @@ class GraphPIC extends StatelessWidget {
                 yValueMapper: (SalesData sales, _) => sales.sales,
                 // Enable data label
                 dataLabelSettings: DataLabelSettings(
-                  textStyle:
-                      TextStyle(fontSize: SizeConfig.safeBlockHorizontal * 0.7),
+                  textStyle: TextStyle(
+                      fontSize:
+                          fontSize ?? SizeConfig.safeBlockHorizontal * 0.7),
                   isVisible: true,
                 ),
                 // Set column width and spacing

@@ -35,7 +35,7 @@ class TabelDashboardContent extends StatelessWidget {
                   ),
                   SizedBox(
                     width: SizeConfig.horizontal(79),
-                    height: SizeConfig.horizontal(20),
+                    height: SizeConfig.horizontal(60),
                     child: PlutoGrid(
                       configuration: PlutoGridConfiguration(
                         columnFilter: PlutoGridColumnFilterConfig(
@@ -58,7 +58,7 @@ class TabelDashboardContent extends StatelessWidget {
                             rowHeight: SizeConfig.horizontal(1.4)),
                       ),
                       createFooter: (PlutoGridStateManager stateManager) {
-                        stateManager.setPageSize(10,
+                        stateManager.setPageSize(30,
                             notify: false); // default 40
                         return PlutoPagination(stateManager);
                       },
