@@ -200,7 +200,7 @@ class _TabelUpdateContentState extends State<TabelUpdateContent> {
                               const Center(child: CircularProgressIndicator()))
                     else
                       SizedBox(
-                        width: SizeConfig.horizontal(79),
+                        width: SizeConfig.horizontal(86),
                         height: SizeConfig.horizontal(30),
                         child: StreamBuilder(
                           stream: dashboardController.streamRowUpdateSheet(

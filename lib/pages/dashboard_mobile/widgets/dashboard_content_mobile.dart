@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../../../controllers/dashboard_controller.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/size_config.dart';
-import '../../dashboard_desktop/widgets/dashboard_content.dart';
+import '../../dashboard_desktop/dashboard_content.dart';
 import '../../widgets/custom/custom_flat_button.dart';
 import '../../widgets/layout/space_sizer.dart';
 import '../../widgets/text/roboto_text_view.dart';

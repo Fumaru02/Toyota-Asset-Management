@@ -55,7 +55,7 @@ class RobotoStyle {
   TextStyle labelStyle() {
     return GoogleFonts.roboto(
       color: Colors.white,
-      fontSize: SizeConfig.safeBlockHorizontal * 1.2,
+      fontSize: SizeConfig.safeBlockHorizontal * 1.1,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.bold,
     );
@@ -82,7 +82,7 @@ class RobotoStyle {
   TextStyle unSelectedStyle() {
     return GoogleFonts.roboto(
       color: Colors.black54,
-      fontSize: SizeConfig.safeBlockHorizontal * 1.2,
+      fontSize: SizeConfig.safeBlockHorizontal * 1,
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w500,
     );

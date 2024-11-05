@@ -12,10 +12,14 @@ class AdminController extends GetxController {
   Rx<String> usernameStaging = RxString('');
   RxBool isLoading = RxBool(false);
   RxBool isShowTableStaging = RxBool(false);
+  RxBool isOpenDashboardTabel = RxBool(false);
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   RxList<StagingDataUser> stagingData =
       RxList<StagingDataUser>(<StagingDataUser>[]);
+  RxList<StagingDataUser> dashboardTabelData =
+      RxList<StagingDataUser>(<StagingDataUser>[]);
   RxList<PlutoRow> rowsStagingData = RxList<PlutoRow>(<PlutoRow>[]);
+  RxList<PlutoRow> rowsDashboardDataTabel = RxList<PlutoRow>(<PlutoRow>[]);
 
   @override
   void onInit() {
@@ -67,6 +71,54 @@ class AdminController extends GetxController {
         .toList();
   }
 
+
+
+  Future<void> getDashboardTabelData() async {
+    try {
+      isLoading.value = true;
+
+      final DocumentSnapshot<Map<String, dynamic>> docSnapshot =
+          await _firestore.collection('data').doc('assets').get();
+
+      print('Document exists: ${docSnapshot.exists}');
+      print('Document data: ${docSnapshot.data()}');
+
+      if (docSnapshot.exists && docSnapshot.data() != null) {
+        final Map<String, dynamic> data = docSnapshot.data()!;
+        if (data['list_assets'] is List) {
+          final List<dynamic> assets = data['list_assets'] as List<dynamic>;
+          print('Raw assets data: $assets');
+
+          dashboardTabelData.value = assets
+              .map((asset) =>
+                  StagingDataUser.fromJson(asset as Map<String, dynamic>))
+              .toList();
+
+          rowsDashboardDataTabel.value =
+              convertToStagingTabel(dashboardTabelData);
+        } else {
+          isLoading.value = false;
+          return;
+        }
+      } else {
+        isLoading.value = false;
+        return;
+      }
+      isLoading.value = false;
+      isOpenDashboardTabel.value = true;
+    } catch (e, stackTrace) {
+      print('Error fetching data: $e');
+      print('Stack trace: $stackTrace');
+      stagingData.clear();
+      rowsStagingData.clear();
+    } finally {
+      isLoading.value = false;
+      update();
+      print(
+          'getUserAssetStage completed. Final staging data length: ${stagingData.length}');
+    }
+  }
+
   Future<void> getUserAssetStage(String name) async {
     try {
       print('Starting getUserAssetStage for user: $name');
@@ -102,11 +154,14 @@ class AdminController extends GetxController {
           rowsStagingData.value = convertToStagingTabel(stagingData);
           print('Converted rows length: ${rowsStagingData.length}');
           isShowTableStaging.value = true;
+          isLoading.value = false;
         } else {
           print('staging_list_assets is not a List or is null');
           stagingData.clear();
           rowsStagingData.clear();
+          isLoading.value = false;
         }
+        isLoading.value = false;
       } else {
         print('No data found for user: $name');
         stagingData.clear();
@@ -143,6 +198,83 @@ class AdminController extends GetxController {
       print('Asset dengan nomor $assetNumber telah dihapus dari staging');
     } catch (e) {
       print('Error saat menghapus asset dari staging: $e');
+    }
+  }
+
+  Future<void> updateTableDashboardSheet(
+      String fieldName, String newValue, String noAsset) async {
+    try {
+      // 1. Ambil dokumen saat ini
+      final DocumentReference userDoc =
+          FirebaseFirestore.instance.collection('data').doc('assets');
+
+      // Get the current document data
+      final DocumentSnapshot docSnapshot = await userDoc.get();
+      if (docSnapshot.exists) {
+        // Explicitly cast the data to Map<String, dynamic>
+        final Map<String, dynamic> data =
+            docSnapshot.data()! as Map<String, dynamic>;
+
+        // Safely get the staging_list_assets and ensure it's a List<dynamic>
+        final List<dynamic> stagingListAssets =
+            (data['list_assets'] as List<dynamic>?) ?? <dynamic>[];
+
+        // 2. Temukan indeks elemen yang ingin diupdate
+        // Asumsikan kita ingin update berdasarkan asset_name yang sama
+        final int indexToUpdate = stagingListAssets
+            .indexWhere((asset) => asset['no_asset'] == noAsset);
+        if (indexToUpdate != -1) {
+          // Update only the image field of the asset
+          stagingListAssets[indexToUpdate][fieldName] = newValue;
+
+          // Update the document with the modified list
+          await userDoc.update(<Object, Object?>{
+            'list_assets': stagingListAssets,
+          });
+
+          print('Asset updated successfully');
+          update();
+        }
+      }
+    } catch (e) {
+      print('Error updating asset: $e');
+    }
+  }
+
+  Future<void> removeAssetFromDashboard(String assetNumber) async {
+    try {
+      isLoading.value = true;
+      // Referensi ke dokumen pengguna
+      final DocumentReference<Map<String, dynamic>> docRef =
+          _firestore.collection('data').doc('assets');
+
+      // Mengambil data pengguna
+      final DocumentSnapshot<Map<String, dynamic>> docSnapshot =
+          await docRef.get();
+      if (!docSnapshot.exists || docSnapshot.data() == null) {
+        isLoading.value = false;
+
+        return;
+      }
+
+      // Mendapatkan data staging_list_assets
+      final Map<String, dynamic> data = docSnapshot.data()!;
+      final List<dynamic> stagingListAssets =
+          data['list_assets'] as List<dynamic>;
+
+      // Mencari dan menghapus asset berdasarkan nomor asset
+      stagingListAssets.removeWhere((asset) =>
+          asset is Map<String, dynamic> && asset['no_asset'] == assetNumber);
+
+      // Memperbarui dokumen dengan list yang telah diperbarui
+      await docRef.update(<Object, Object?>{'list_assets': stagingListAssets});
+
+      print('Asset dengan nomor $assetNumber telah dihapus dari dashboard');
+      await getDashboardTabelData();
+      // Memperbarui data lokal
+      isLoading.value = false;
+    } catch (e) {
+      print('Error saat menghapus asset dari dashboard: $e');
     }
   }
 

@@ -1,14 +1,11 @@
 import 'package:easy_sidemenu/easy_sidemenu.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../../controllers/auth_controller.dart';
 import '../../controllers/dashboard_controller.dart';
 import '../../utils/app_colors.dart';
-import '../../utils/constant.dart';
 import '../../utils/size_config.dart';
-import '../dashboard_desktop/widgets/tabel_check_sheet_content.dart';
 import '../widgets/custom/custom_flat_button.dart';
 import '../widgets/layout/space_sizer.dart';
 import '../widgets/text/roboto_text_view.dart';
@@ -229,9 +226,9 @@ class DashboardPagesMobile extends StatelessWidget {
                 )
               else
                 Container(),
-              CheckSheetContent(
-                dashboardController: dashboardController,
-              ),
+              // CheckSheetContent(
+              //   dashboardController: dashboardController,
+              // ),
               UpdateSheetMobile(
                 dashboardController: dashboardController,
               ),
@@ -260,179 +257,4 @@ class DashboardPagesMobile extends StatelessWidget {
       ],
     );
   }
-}
-
-
-class CheckSheetContent extends StatelessWidget {
-  const CheckSheetContent({
-    super.key,
-    required this.dashboardController,
-  });
-
-  final DashboardController dashboardController;
-
-  @override
-  Widget build(BuildContext context) {
-    final List<_ChartData> chartData = <_ChartData>[
-      _ChartData(
-        'Ideal',
-        50,
-        55,
-      ),
-      _ChartData('Other', 10, 0),
-    ];
-    return SingleChildScrollView(
-      child: Container(
-        color: AppColors.greySecond,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.all(SizeConfig.horizontal(1)),
-              child: Row(
-                children: <Widget>[
-                  RobotoTextView(
-                    value: 'Pages /',
-                    size: SizeConfig.safeBlockHorizontal * 1,
-                    color: AppColors.grey,
-                  ),
-                  const SpaceSizer(
-                    horizontal: 0.5,
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                        color: AppColors.maroon,
-                        borderRadius: BorderRadius.all(
-                            Radius.circular(SizeConfig.horizontal(0.4)))),
-                    padding: EdgeInsets.all(SizeConfig.horizontal(0.4)),
-                    child: RobotoTextView(
-                      value: 'Check Sheet',
-                      size: SizeConfig.safeBlockHorizontal * 1,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(left: SizeConfig.horizontal(3)),
-                  child: SizedBox(
-                    width: SizeConfig.horizontal(12),
-                    height: SizeConfig.horizontal(18),
-                    child: ListView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: 2,
-                      itemBuilder: (BuildContext context, int index) =>
-                          Container(
-                        margin: EdgeInsets.symmetric(
-                            vertical: SizeConfig.horizontal(2)),
-                        width: SizeConfig.horizontal(10),
-                        child: ExpansionTile(
-                            iconColor: AppColors.maroon,
-                            collapsedBackgroundColor: AppColors.white,
-                            backgroundColor: AppColors.white,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(Radius.circular(
-                                    SizeConfig.horizontal(0.3)))),
-                            collapsedShape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(Radius.circular(
-                                    SizeConfig.horizontal(0.3)))),
-                            title: RobotoTextView(
-                              value: ConstantString().columnMenu[index],
-                              size: SizeConfig.safeBlockHorizontal * 1,
-                            )),
-                      ),
-                    ),
-                  ),
-                ),
-                const SpaceSizer(
-                  horizontal: 2,
-                ),
-                Container(
-                  width: SizeConfig.horizontal(45),
-                  height: SizeConfig.horizontal(15),
-                  color: AppColors.white,
-                  child: SfCartesianChart(
-                    plotAreaBorderWidth: 0,
-                    title: const ChartTitle(text: 'Status Check'),
-                    legend: const Legend(
-                      isVisible: true,
-                      overflowMode: LegendItemOverflowMode.wrap,
-                    ),
-                    primaryXAxis: const CategoryAxis(
-                      majorGridLines: MajorGridLines(width: 0),
-                    ),
-                    primaryYAxis: const NumericAxis(
-                        rangePadding: ChartRangePadding.none,
-                        axisLine: AxisLine(width: 0),
-                        majorTickLines: MajorTickLines(size: 0)),
-                    series: <CartesianSeries<_ChartData, String>>[
-                      StackedColumn100Series<_ChartData, String>(
-                          dataSource: chartData,
-                          dataLabelSettings:
-                              const DataLabelSettings(isVisible: true),
-                          xValueMapper: (_ChartData sales, _) => sales.x,
-                          yValueMapper: (_ChartData sales, _) => sales.y1,
-                          name: 'Product A'),
-                      StackedColumn100Series<_ChartData, String>(
-                          dataSource: chartData,
-                          dataLabelSettings:
-                              const DataLabelSettings(isVisible: true),
-                          xValueMapper: (_ChartData sales, _) => sales.x,
-                          yValueMapper: (_ChartData sales, _) => sales.y2,
-                          name: 'Product B'),
-                    ],
-                    tooltipBehavior: dashboardController.tooltipBehavior,
-                  ),
-                ),
-                const SpaceSizer(
-                  horizontal: 2,
-                ),
-                Container(
-                  width: SizeConfig.horizontal(12),
-                  decoration: BoxDecoration(
-                      color: AppColors.white,
-                      border: Border.all(color: AppColors.maroon)),
-                  child: Column(
-                    children: <Widget>[
-                      RobotoTextView(
-                        value: '% Check',
-                        size: SizeConfig.safeBlockHorizontal * 2,
-                      ),
-                      Divider(
-                        thickness: 1.0,
-                        color: AppColors.maroon,
-                      ),
-                      RobotoTextView(
-                        value: '61%',
-                        color: AppColors.maroon,
-                        size: SizeConfig.safeBlockHorizontal * 2.5,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const TabelCheckSheetContent()
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Private class for storing the stacked column series data points.
-class _ChartData {
-  _ChartData(
-    this.x,
-    this.y1,
-    this.y2,
-  );
-  final String x;
-  final num y1;
-  final num y2;
 }

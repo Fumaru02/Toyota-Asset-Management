@@ -12,7 +12,7 @@ import '../widgets/custom/custom_ripple_button.dart';
 import '../widgets/custom/custom_text_field.dart';
 import '../widgets/layout/space_sizer.dart';
 import '../widgets/text/roboto_text_view.dart';
-import 'widgets/dashboard_content.dart';
+import 'dashboard_content.dart';
 import 'widgets/tabel_update_content.dart';
 
 class UpdateSheet extends StatelessWidget {
@@ -581,6 +581,7 @@ class UpdateSheet extends StatelessWidget {
                                             .deleteDataAfterUploading(
                                                 dashboardController
                                                     .username.value);
+                                        Get.back();
                                       } else {
                                         return;
                                       }

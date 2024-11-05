@@ -23,7 +23,7 @@ class TabelDashboardContent extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.all(SizeConfig.horizontal(0.6)),
                     alignment: Alignment.center,
-                    width: SizeConfig.horizontal(79),
+                    width: SizeConfig.horizontal(85),
                     color: AppColors.maroon,
                     child: RobotoTextView(
                       value: 'List Asset',
@@ -34,7 +34,7 @@ class TabelDashboardContent extends StatelessWidget {
                     ),
                   ),
                   SizedBox(
-                    width: SizeConfig.horizontal(79),
+                    width: SizeConfig.horizontal(85),
                     height: SizeConfig.horizontal(60),
                     child: PlutoGrid(
                       configuration: PlutoGridConfiguration(

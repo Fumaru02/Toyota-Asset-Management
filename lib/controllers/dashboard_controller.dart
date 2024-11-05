@@ -13,7 +13,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import '../models/get_data_user.dart';
 import '../models/get_list_assets.dart';
 import '../models/staging_data_user.dart';
-import '../pages/dashboard_desktop/widgets/dashboard_content.dart';
+import '../pages/dashboard_desktop/dashboard_content.dart';
 import 'update_sheet_controller.dart';
 
 class DashboardController extends GetxController {
@@ -72,6 +72,7 @@ class DashboardController extends GetxController {
   RxInt tlc2str = RxInt(0);
   RxInt sunter1 = RxInt(0);
   RxInt akti = RxInt(0);
+  final RxDouble totalPersentase = RxDouble(0);
   RxInt ho = RxInt(0);
 
   RxInt tlc1krwChecked = RxInt(0);
@@ -99,7 +100,6 @@ class DashboardController extends GetxController {
     sideMenu.addListener((int index) {
       pageController.jumpToPage(index);
     });
-    print('${username.value} lol');
   }
 
   Future<void> getDataUserManagement() async {
@@ -221,7 +221,6 @@ class DashboardController extends GetxController {
     location.value = (data['location'] as List<dynamic>)
         .map((dynamic e) => e.toString().toUpperCase())
         .toList();
-    log(location.toString());
     update();
   }
 
@@ -248,6 +247,7 @@ class DashboardController extends GetxController {
         }
       }
     }
+
     totalAssetHandledByPIC
         .add(SalesData('', 0, handledPICtotal.value as double));
 
@@ -265,6 +265,37 @@ class DashboardController extends GetxController {
     }
 
     update();
+  }
+
+  Stream<DocumentSnapshot> getAssetCheckingStream() {
+    return FirebaseFirestore.instance
+        .collection('data')
+        .doc('checking_asset')
+        .snapshots();
+  }
+
+  // Method untuk mengolah data dari snapshot
+  void processAreaData(Map<String, dynamic> areaMap) {
+    if (areaMap.containsKey('tlc1 krw')) {
+      final List<dynamic> tlc1List = areaMap['tlc1 krw'] as List<dynamic>;
+      tlc1krwChecked.value = tlc1List.length;
+    }
+    if (areaMap.containsKey('tlc2 str')) {
+      final List<dynamic> tlc2StrList = areaMap['tlc2 str'] as List<dynamic>;
+      tlc2strChecked.value = tlc2StrList.length;
+    }
+    if (areaMap.containsKey('tlc3 krw')) {
+      final List<dynamic> tlc3List = areaMap['tlc3 krw'] as List<dynamic>;
+      tlc3krwChecked.value = tlc3List.length;
+    }
+    if (areaMap.containsKey('sunter 1')) {
+      final List<dynamic> sunter1List = areaMap['sunter 1'] as List<dynamic>;
+      sunter1Checked.value = sunter1List.length;
+    }
+    if (areaMap.containsKey('akti')) {
+      final List<dynamic> aktiList = areaMap['akti'] as List<dynamic>;
+      aktiChecked.value = aktiList.length;
+    }
   }
 
   Future<void> totalCheckingAssetAllArea(String date) async {
@@ -289,42 +320,36 @@ class DashboardController extends GetxController {
         if (monthData.containsKey('area')) {
           final List<dynamic> areaList = monthData['area'] as List<dynamic>;
 
-          for (final dynamic areaItem in areaList) {
-            if (areaItem is Map<String, dynamic> &&
-                areaItem.containsKey('tlc1_krw')) {
-              print('Area TLC1_KRW: ${areaItem['tlc1_krw']}');
+          for (final dynamic area in areaList) {
+            // Pastikan area adalah Map
+            final Map<String, dynamic> areaMap = area as Map<String, dynamic>;
 
-              tlc1krwChecked.value = areaItem['tlc1_krw'] as int;
+            if (areaMap.containsKey('tlc1 krw')) {
+              final List<dynamic> tlc1List =
+                  areaMap['tlc1 krw'] as List<dynamic>;
+              tlc1krwChecked.value = tlc1List.length;
             }
-            if (areaItem is Map<String, dynamic> &&
-                areaItem.containsKey('akti')) {
-              print('Area akti: ${areaItem['akti']}');
 
-              aktiChecked.value = areaItem['akti'] as int;
+            if (areaMap.containsKey('tlc2 str')) {
+              final List<dynamic> tlc2StrList =
+                  areaMap['tlc2 str'] as List<dynamic>;
+              tlc2strChecked.value = tlc2StrList.length;
             }
-            if (areaItem is Map<String, dynamic> &&
-                areaItem.containsKey('tlc2_str')) {
-              print('Area tlc2_str: ${areaItem['tlc2_str']}');
 
-              tlc2strChecked.value = areaItem['tlc2_str'] as int;
+            if (areaMap.containsKey('tlc3 krw')) {
+              final List<dynamic> tlc3List =
+                  areaMap['tlc3 krw'] as List<dynamic>;
+              tlc3krwChecked.value = tlc3List.length;
             }
-            if (areaItem is Map<String, dynamic> &&
-                areaItem.containsKey('ho')) {
-              print('Area ho: ${areaItem['ho']}');
-
-              hoChecked.value = areaItem['ho'] as int;
+            if (areaMap.containsKey('sunter 1')) {
+              final List<dynamic> sunter1List =
+                  areaMap['sunter 1'] as List<dynamic>;
+              sunter1Checked.value = sunter1List.length;
             }
-            if (areaItem is Map<String, dynamic> &&
-                areaItem.containsKey('tlc3_krw')) {
-              print('Area tlc3_krw: ${areaItem['tlc3_krw']}');
 
-              tlc3krwChecked.value = areaItem['tlc3_krw'] as int;
-            }
-            if (areaItem is Map<String, dynamic> &&
-                areaItem.containsKey('sunter1')) {
-              print('Area sunter1: ${areaItem['sunter1']}');
-
-              sunter1Checked.value = areaItem['sunter1'] as int;
+            if (areaMap.containsKey('akti')) {
+              final List<dynamic> aktiList = areaMap['akti'] as List<dynamic>;
+              aktiChecked.value = aktiList.length;
             }
           }
         }
@@ -361,9 +386,6 @@ class DashboardController extends GetxController {
           for (final dynamic areaItem in areaList) {
             if (areaItem is Map<String, dynamic> &&
                 areaItem.containsKey(modifiedSelectedArea)) {
-              log(modifiedSelectedArea);
-
-              print('Area TLC1 KRW: ${areaItem[modifiedSelectedArea]}');
               totalCheckByArea.add(
                   SalesData('', 1, areaItem[modifiedSelectedArea] as double));
               return;
@@ -420,7 +442,6 @@ class DashboardController extends GetxController {
                         allPic.add(name);
                       }
                       picTotals[name] = (picTotals[name] ?? 0) + total;
-                      log('$name has $area: $total');
                     }
                   }
                 });
@@ -460,7 +481,6 @@ class DashboardController extends GetxController {
 
       // Print the results
       for (final String name in allPic) {
-        log('$name total check ${picTotals[name]} and total handle asset ${picAssetCounts[name] ?? 0}');
         allPicTotalAssets.add(picAssetCounts[name] ?? 0);
       }
       update();
@@ -697,13 +717,11 @@ class DashboardController extends GetxController {
         final Map<String, dynamic> data =
             documentSnapshot.data() as Map<String, dynamic>;
         final List<dynamic> listData = data['list_assets'] as List<dynamic>;
-        log(listData.toString());
         dataList.value = listData
             .map((dynamic e) =>
                 GetListAssets.fromJson(e as Map<String, dynamic>))
             .toList();
         rowListAsset.value = convertToListAssetsTabel(dataList);
-        log(rowListAsset.toString());
       });
       isLoading.value = false;
       update();
@@ -750,7 +768,7 @@ class DashboardController extends GetxController {
         .map((dynamic data) => PlutoRow(
               cells: <String, PlutoCell>{
                 'asset_name': PlutoCell(value: data.assetName),
-                'area_field': PlutoCell(value: data.area),
+                'area_field': PlutoCell(value: data.area.toUpperCase()),
                 'category_field': PlutoCell(value: data.category),
                 'coordinator_field': PlutoCell(value: data.coordinator),
                 'image_field': PlutoCell(value: data.image),
@@ -816,7 +834,6 @@ class DashboardController extends GetxController {
         stagingData.clear();
         rowsStagingData.clear();
       }
-      Get.back();
     } catch (e, stackTrace) {
       print('Error fetching or deleting data: $e');
       print('Stack trace: $stackTrace');
@@ -859,6 +876,34 @@ class DashboardController extends GetxController {
     } catch (e) {
       print('Error fetching data: $e');
     }
+  }
+
+  Stream<List<dynamic>> streamRowCheckSheet() {
+    return FirebaseFirestore.instance
+        .collection('data')
+        .doc('assets')
+        .snapshots()
+        .map((DocumentSnapshot<Map<String, dynamic>> docSnapshot) {
+      if (docSnapshot.exists && docSnapshot.data() != null) {
+        final Map<String, dynamic> data = docSnapshot.data()!;
+        if (data['list_assets'] is List) {
+          final List<dynamic> assets = data['list_assets'] as List<dynamic>;
+          return assets
+              .map((asset) =>
+                  StagingDataUser.fromJson(asset as Map<String, dynamic>))
+              .toList();
+        } else {
+          print('list_assets is not a List or is null');
+          return <dynamic>[];
+        }
+      } else {
+        return <dynamic>[];
+      }
+    }).handleError((dynamic error, dynamic stackTrace) {
+      print('Error fetching data: $error');
+      print('Stack trace: $stackTrace');
+      return <dynamic>[];
+    });
   }
 
   Stream<List<dynamic>> streamRowUpdateSheet(String name) {

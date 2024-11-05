@@ -199,7 +199,7 @@ class _TabelStagingUserState extends State<TabelStagingUser> {
               return const CircularProgressIndicator();
             } else {
               return SizedBox(
-                width: SizeConfig.horizontal(79),
+                width: SizeConfig.horizontal(85),
                 height: SizeConfig.horizontal(30),
                 child: PlutoGrid(
                   configuration: PlutoGridConfiguration(

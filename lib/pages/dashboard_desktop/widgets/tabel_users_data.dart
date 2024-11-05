@@ -25,7 +25,7 @@ class TabelUsersData extends StatelessWidget {
           ),
           Container(
             alignment: Alignment.center,
-            width: SizeConfig.horizontal(80),
+            width: SizeConfig.horizontal(85),
             color: AppColors.maroon,
             child: RobotoTextView(
               value: 'List Users',
@@ -36,6 +36,7 @@ class TabelUsersData extends StatelessWidget {
             ),
           ),
           SizedBox(
+            width: SizeConfig.horizontal(85),
             height: SizeConfig.horizontal(30),
             child: PlutoGrid(
                 configuration: PlutoGridConfiguration(
@@ -95,7 +96,7 @@ List<PlutoColumn> columns = <PlutoColumn>[
   ),
 
   PlutoColumn(
-    width: SizeConfig.horizontal(20),
+    width: SizeConfig.horizontal(21),
     title: 'Role Member',
     field: 'role_field',
     type: PlutoColumnType.select(<String>['Guest', 'Admin', 'Super Admin']),
@@ -113,7 +114,7 @@ List<PlutoColumn> columns = <PlutoColumn>[
   ),
 
   PlutoColumn(
-      width: SizeConfig.horizontal(20),
+      width: SizeConfig.horizontal(22),
       title: 'Email',
       field: 'email_value',
       type: PlutoColumnType.text(),
@@ -130,7 +131,7 @@ List<PlutoColumn> columns = <PlutoColumn>[
       backgroundColor: AppColors.maroon),
 
   PlutoColumn(
-      width: SizeConfig.horizontal(20),
+      width: SizeConfig.horizontal(22),
       title: 'User UID',
       titleTextAlign: PlutoColumnTextAlign.center,
       field: 'user_uid',

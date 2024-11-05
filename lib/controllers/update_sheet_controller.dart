@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,7 +12,6 @@ import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
-import 'package:universal_io/io.dart';
 
 import '../helpers/snackbar.dart';
 import '../models/staging_data_user.dart';
@@ -57,6 +55,93 @@ class UpdateSheetController extends GetxController {
   RxInt year = RxInt(0);
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<void> updateLastChecked(String noAsset) async {
+    try {
+      final DateTime now = DateTime.now();
+      final String formattedTime =
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
+      // Reference to the Firestore collection and document
+      final DocumentReference userDoc =
+          FirebaseFirestore.instance.collection('data').doc('assets');
+
+      // Get the current document data
+      final DocumentSnapshot docSnapshot = await userDoc.get();
+      if (docSnapshot.exists) {
+        // Explicitly cast the data to Map<String, dynamic>
+        final Map<String, dynamic> data =
+            docSnapshot.data()! as Map<String, dynamic>;
+
+        // Safely get the staging_list_assets and ensure it's a List<dynamic>
+        final List<dynamic> listAssets =
+            (data['list_assets'] as List<dynamic>?) ?? <dynamic>[];
+
+        // Find the index of the asset to update
+        final int indexToUpdate =
+            listAssets.indexWhere((asset) => asset['no_asset'] == noAsset);
+
+        if (indexToUpdate != -1) {
+          // Update only the image field of the asset
+          listAssets[indexToUpdate]['input_time'] = formattedTime;
+
+          // Update the document with the modified list
+          await userDoc.update(<Object, Object?>{
+            'list_assets': listAssets,
+          });
+
+          print('Asset image updated successfully');
+        } else {
+          print('Asset with ID 4 not found in the list');
+        }
+      } else {
+        print('Document does not exist');
+      }
+    } catch (e) {
+      print('Error updating asset image: $e');
+    }
+  }
+
+  Future<void> updateImageAssetDashboard(String newImage) async {
+    try {
+      // Reference to the Firestore collection and document
+      final DocumentReference userDoc =
+          FirebaseFirestore.instance.collection('data').doc('assets');
+
+      // Get the current document data
+      final DocumentSnapshot docSnapshot = await userDoc.get();
+      if (docSnapshot.exists) {
+        // Explicitly cast the data to Map<String, dynamic>
+        final Map<String, dynamic> data =
+            docSnapshot.data()! as Map<String, dynamic>;
+
+        // Safely get the staging_list_assets and ensure it's a List<dynamic>
+        final List<dynamic> listAssets =
+            (data['list_assets'] as List<dynamic>?) ?? <dynamic>[];
+
+        // Find the index of the asset to update
+        final int indexToUpdate = listAssets
+            .indexWhere((asset) => asset['no_asset'] == noAssetUpdate.value);
+
+        if (indexToUpdate != -1) {
+          // Update only the image field of the asset
+          listAssets[indexToUpdate]['image'] = newImage;
+
+          // Update the document with the modified list
+          await userDoc.update(<Object, Object?>{
+            'list_assets': listAssets,
+          });
+          updateLastChecked(noAssetUpdate.value);
+          print('Asset image updated successfully');
+        } else {
+          print('Asset with ID 4 not found in the list');
+        }
+      } else {
+        print('Document does not exist');
+      }
+    } catch (e) {
+      print('Error updating asset image: $e');
+    }
+  }
 
   Future<void> updateImageAsset(String username, String newImage) async {
     try {
@@ -371,6 +456,39 @@ class UpdateSheetController extends GetxController {
     }
   }
 
+  Future<void> pickImageSuperAdmin(
+      ImageSource source, bool isUpdate, String username) async {
+    final DateTime now = DateTime.now();
+    final String formattedTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
+    try {
+      isLoading.value = true;
+      final XFile? image = await ImagePicker().pickImage(source: source);
+      if (image == null) {
+        Snack.show(SnackbarType.error, 'Information', 'Failed to pick image');
+        isLoading.value = false;
+        return;
+      }
+      // Baca gambar sebagai bytes
+      previewImageBytes.value = await image.readAsBytes();
+
+      // Kompresi gambar
+      final Uint8List compressedImage =
+          await compressImage(previewImageBytes.value!);
+      imageAsset.value = compressedImage;
+
+      await uploadImage(
+          imageAsset.value!, '${formattedTime}_compressed_edit.jpg');
+      updateImageAssetDashboard(
+        imageUrl.value,
+      );
+      isLoading.value = false;
+      update();
+    } catch (e) {
+      Snack.show(SnackbarType.error, 'Error', 'Failed to pick image: $e');
+    }
+    update();
+  }
+
   Future<void> pickImage(
       ImageSource source, bool isUpdate, String username) async {
     final DateTime now = DateTime.now();
@@ -419,10 +537,10 @@ class UpdateSheetController extends GetxController {
     if (image.width > 1024 || image.height > 1024) {
       image = img.copyResize(image, width: 1024, height: 1024);
     }
-    int quality = 85;
+    int quality = 95;
 
     // Kompresi gambar
-    List<int> compressedBytes = img.encodeJpg(image, quality: 85);
+    List<int> compressedBytes = img.encodeJpg(image, quality: 95);
 
     // Jika ukuran masih di atas 1MB, kurangi kualitas secara bertahap
     while (compressedBytes.length > 1024 * 1024 && quality > 10) {
@@ -449,39 +567,6 @@ class UpdateSheetController extends GetxController {
     Snack.show(SnackbarType.success, 'Image',
         'Image berhasil di tambahkan mohon refresh jika image tidak terupdate');
     imageUrl.value = url;
-    update();
-  }
-
-  Future<dynamic> pickImageAndroid(ImageSource source) async {
-    try {
-      final SettableMetadata metadata =
-          SettableMetadata(contentType: 'image/jpeg');
-      final XFile? image = await ImagePicker().pickImage(source: source);
-      final Reference ref = firebaseStorage
-          .ref('sheet')
-          .child('sheet_image')
-          .child('test')
-          .child('test.jpeg');
-
-      if (image == null) {
-        return Snack.show(
-            SnackbarType.error, 'Information', 'Failed to pick image');
-      }
-      final File imageTemp = File(image.path);
-      await ref.putFile(imageTemp, metadata);
-      final String url = await ref.getDownloadURL();
-      Get.back();
-      Snack.show(SnackbarType.success, 'Image',
-          'Image has been uploaded, Image will replaced after pressing Submit');
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc('test_image')
-          .update(<Object, Object?>{'user_image': url});
-    } on PlatformException catch (e) {
-      if (e.code != null) {
-        Snack.show(SnackbarType.error, 'Information', 'Failed to pick image');
-      }
-    }
     update();
   }
 
