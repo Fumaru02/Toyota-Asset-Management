@@ -10,6 +10,7 @@ import '../widgets/custom/custom_flat_button.dart';
 import '../widgets/layout/space_sizer.dart';
 import '../widgets/text/roboto_text_view.dart';
 import 'admin_panel_mobile.dart';
+import 'check_sheet_mobile.dart';
 import 'update_sheet_mobile.dart';
 import 'widgets/dashboard_content_mobile.dart';
 
@@ -117,7 +118,7 @@ class DashboardPagesMobile extends StatelessWidget {
                     dashboardController.sideMenu.changePage(index);
                   },
                   icon: const Icon(Icons.check_box_sharp),
-                  tooltipContent: 'Expansion Item 1',
+                  tooltipContent: 'Check Sheet',
                 ),
                 SideMenuItem(
                   title: 'Update Sheet',
@@ -226,9 +227,9 @@ class DashboardPagesMobile extends StatelessWidget {
                 )
               else
                 Container(),
-              // CheckSheetContent(
-              //   dashboardController: dashboardController,
-              // ),
+              CheckSheetMobile(
+                dashboardController: dashboardController,
+              ),
               UpdateSheetMobile(
                 dashboardController: dashboardController,
               ),

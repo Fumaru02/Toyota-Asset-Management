@@ -398,11 +398,15 @@ class GraphicsCheckSheet extends StatelessWidget {
     required this.dashboardController,
     required this.checkSheetController,
     this.fontSize,
+    this.height,
+    this.width,
   });
 
   final DashboardController dashboardController;
   final CheckSheetController checkSheetController;
   final double? fontSize;
+  final double? height;
+  final double? width;
 
   @override
   Widget build(BuildContext context) {
@@ -429,8 +433,8 @@ class GraphicsCheckSheet extends StatelessWidget {
           return Obx(
             () => Container(
                 color: AppColors.white,
-                width: SizeConfig.horizontal(50),
-                height: SizeConfig.horizontal(20),
+                width: SizeConfig.horizontal(width ?? 50),
+                height: SizeConfig.horizontal(height ?? 20),
                 child: SfCartesianChart(
                     primaryXAxis: CategoryAxis(
                       axisLabelFormatter: (AxisLabelRenderDetails details) {

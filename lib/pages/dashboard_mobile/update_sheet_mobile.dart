@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../../controllers/dashboard_controller.dart';
 import '../../controllers/update_sheet_controller.dart';
@@ -13,6 +12,7 @@ import '../widgets/custom/custom_text_field.dart';
 import '../widgets/layout/space_sizer.dart';
 import '../widgets/text/roboto_text_view.dart';
 import 'widgets/custom_dropdown_form_mobile.dart';
+import 'widgets/tabel_check_sheet_content.dart';
 import 'widgets/tabel_update_content_mobile.dart';
 
 class UpdateSheetMobile extends StatelessWidget {
@@ -383,85 +383,11 @@ class UpdateSheetMobile extends StatelessWidget {
                                         borderRadius: BorderRadius.zero,
                                         onTap: () async {
                                           showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) =>
-                                                Dialog(
-                                              child: SizedBox(
-                                                width:
-                                                    SizeConfig.horizontal(40),
-                                                height:
-                                                    SizeConfig.horizontal(30),
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: <Widget>[
-                                                    RobotoTextView(
-                                                      value:
-                                                          'Pilihan pengambilan gambar',
-                                                      size: SizeConfig
-                                                              .safeBlockHorizontal *
-                                                          3,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color: AppColors.black,
-                                                    ),
-                                                    const SpaceSizer(
-                                                      vertical: 3,
-                                                    ),
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceAround,
-                                                      children: <Widget>[
-                                                        CustomFlatButton(
-                                                            width: 20,
-                                                            height: 5,
-                                                            backgroundColor:
-                                                                AppColors
-                                                                    .maroon,
-                                                            textColor:
-                                                                AppColors.white,
-                                                            text: 'Gallery',
-                                                            textSize: SizeConfig
-                                                                    .safeBlockHorizontal *
-                                                                3,
-                                                            onTap: () async {
-                                                              await updateSheetController
-                                                                  .pickImage(
-                                                                      ImageSource
-                                                                          .gallery,
-                                                                      false,
-                                                                      '');
-                                                              Get.back();
-                                                            }),
-                                                        CustomFlatButton(
-                                                            width: 20,
-                                                            height: 5,
-                                                            backgroundColor:
-                                                                AppColors
-                                                                    .maroon,
-                                                            textColor:
-                                                                AppColors.white,
-                                                            text: 'Camera',
-                                                            textSize: SizeConfig
-                                                                    .safeBlockHorizontal *
-                                                                3,
-                                                            onTap: () async {
-                                                              await updateSheetController
-                                                                  .pickImage(
-                                                                      ImageSource
-                                                                          .camera,
-                                                                      false,
-                                                                      '');
-                                                              Get.back();
-                                                            }),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          );
+                                              context: context,
+                                              builder: (BuildContext context) =>
+                                                  MobilePickImage(
+                                                      updateSheetController:
+                                                          updateSheetController));
                                         },
                                         child: Container(
                                           width: SizeConfig.horizontal(60),

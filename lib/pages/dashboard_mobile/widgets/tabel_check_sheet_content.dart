@@ -1,27 +1,33 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../controllers/check_sheet_controller.dart';
 import '../../../controllers/dashboard_controller.dart';
 import '../../../controllers/update_sheet_controller.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/size_config.dart';
 import '../../widgets/custom/custom_flat_button.dart';
+import '../../widgets/layout/space_sizer.dart';
 import '../../widgets/text/roboto_text_view.dart';
-import 'tabel_check_sheet_content.dart';
 
-class TabelUpdateContentMobile extends StatefulWidget {
-  const TabelUpdateContentMobile({super.key});
+class TabelCheckSheetMobileContent extends StatefulWidget {
+  const TabelCheckSheetMobileContent({super.key});
 
   @override
-  _TabelUpdateContentMobileState createState() =>
-      _TabelUpdateContentMobileState();
+  _TabelCheckSheetMobileContentState createState() =>
+      _TabelCheckSheetMobileContentState();
 }
 
-class _TabelUpdateContentMobileState extends State<TabelUpdateContentMobile> {
+class _TabelCheckSheetMobileContentState
+    extends State<TabelCheckSheetMobileContent> {
   late DashboardController dashboardController;
   late UpdateSheetController updateSheetController;
+  late CheckSheetController checkSheetController;
   late List<PlutoColumn> columns;
 
   @override
@@ -29,36 +35,44 @@ class _TabelUpdateContentMobileState extends State<TabelUpdateContentMobile> {
     super.initState();
     dashboardController = Get.put(DashboardController());
     updateSheetController = Get.put(UpdateSheetController());
+    checkSheetController = Get.put(CheckSheetController());
     _initializeColumns();
   }
 
   void _initializeColumns() {
     columns = <PlutoColumn>[
-      _buildColumn(40, 'No Asset', 'no_asset', PlutoColumnType.text(), false),
-      _buildColumn(
-          40, 'Asset Name', 'asset_name', PlutoColumnType.text(), true),
-      _buildColumn(40, 'Category', 'category_field',
+      _buildColumn('No Asset', 'no_asset', PlutoColumnType.text(), false),
+      _buildColumn('Asset Name', 'asset_name', PlutoColumnType.text(), true),
+      _buildColumn('Category', 'category_field',
           PlutoColumnType.select(dashboardController.category), true),
-      _buildColumn(30, 'Coordinator', 'coordinator_field',
+      _buildColumn('Coordinator', 'coordinator_field',
           PlutoColumnType.select(dashboardController.coordinator), true),
-      _buildColumn(40, 'PIC', 'pic_field',
+      _buildColumn('PIC', 'pic_field',
           PlutoColumnType.select(dashboardController.allPic), false),
-      _buildColumn(40, 'Area', 'area_field',
+      _buildColumn('Area', 'area_field',
           PlutoColumnType.select(dashboardController.area), true),
       _buildImageColumn(),
-      _buildColumn(60, 'Location', 'location_field',
+      _buildColumn('Location', 'location_field',
           PlutoColumnType.select(dashboardController.location), true),
       _buildColumn(
-          60, 'Input Time', 'input_time_field', PlutoColumnType.text(), false),
-      _buildColumn(20, 'Year', 'year_field', PlutoColumnType.text(), false),
+          'Last Checked', 'input_time_field', PlutoColumnType.text(), false),
+      _buildColumn(
+        'Year',
+        'year_field',
+        PlutoColumnType.text(),
+        false,
+      ),
       _buildDeleteAsset('is_check_field', 30, false)
     ];
   }
 
-  PlutoColumn _buildColumn(double width, String title, String field,
-      PlutoColumnType type, bool edit) {
+  PlutoColumn _buildColumn(
+    String title,
+    String field,
+    PlutoColumnType type,
+    bool edit,
+  ) {
     return PlutoColumn(
-      width: SizeConfig.horizontal(width),
       title: title,
       field: field,
       type: type,
@@ -81,31 +95,63 @@ class _TabelUpdateContentMobileState extends State<TabelUpdateContentMobile> {
     return PlutoColumn(
       width: SizeConfig.horizontal(width),
       enableEditingMode: edit,
-      title: 'Settings',
+      title: 'Check',
       field: field,
       type: PlutoColumnType.text(),
       textAlign: PlutoColumnTextAlign.center,
       titleTextAlign: PlutoColumnTextAlign.center,
       backgroundColor: AppColors.maroon,
       renderer: (PlutoColumnRendererContext rendererContext) {
-        return CustomFlatButton(
-          backgroundColor: AppColors.maroon,
-          textColor: AppColors.white,
-          width: SizeConfig.horizontal(8),
-          textSize: SizeConfig.safeBlockHorizontal * 3,
-          height: SizeConfig.horizontal(2),
-          text: 'Delete',
-          onTap: () {
-            final String deletedAseetNumber =
-                rendererContext.row.cells['no_asset']?.value as String;
-            updateSheetController.removeAssetFromStaging(
-                dashboardController.username.value, deletedAseetNumber);
-          },
+        // Ambil tanggal terakhir check dari database
+        final String lastCheckDate =
+            rendererContext.row.cells['input_time_field']?.value as String;
+
+        // Convert string date ke DateTime object
+        final DateTime lastCheck =
+            DateTime.tryParse(lastCheckDate) ?? DateTime.now();
+        final DateTime today = DateTime.now();
+
+        // Compare tanggal dengan hari ini
+        final bool isToday = lastCheck.year == today.year &&
+            lastCheck.month == today.month &&
+            lastCheck.day == today.day;
+
+        return Center(
+          child: CustomFlatButton(
+            backgroundColor: Colors.transparent,
+            radius: 0,
+            height: SizeConfig.horizontal(30),
+            width: SizeConfig.horizontal(20),
+            text: '',
+            icon: isToday ? Icons.check_box : Icons.crop_square_sharp,
+            // Ubah warna icon berdasarkan tanggal
+            colorIconImage: isToday ? AppColors.greenSuccess : Colors.black,
+            onTap: () async {
+              checkSheetController.noAssetCheck.value =
+                  rendererContext.row.cells['no_asset']?.value as String;
+              checkSheetController.picAssetCheck.value =
+                  rendererContext.row.cells['pic_field']?.value as String;
+              checkSheetController.locationAssetCheck.value =
+                  rendererContext.row.cells['location_field']?.value as String;
+              checkSheetController.areaAssetCheck.value =
+                  rendererContext.row.cells['area_field']?.value as String;
+
+              // Update tanggal terakhir check
+              await checkSheetController
+                  .updateLastChecked(checkSheetController.noAssetCheck.value);
+              await checkSheetController.addOrUpdateCheckAsset(
+                area: checkSheetController.areaAssetCheck.value.toLowerCase(),
+                location: checkSheetController.locationAssetCheck.value,
+                pic: checkSheetController.picAssetCheck.value,
+                noAsset: checkSheetController.noAssetCheck.value,
+              );
+            },
+          ),
         );
       },
       titleSpan: WidgetSpan(
         child: RobotoTextView(
-          value: 'Settings',
+          value: 'Check',
           size: SizeConfig.safeBlockHorizontal * 3,
           fontWeight: FontWeight.w600,
           color: AppColors.white,
@@ -196,10 +242,9 @@ class _TabelUpdateContentMobileState extends State<TabelUpdateContentMobile> {
                     else
                       SizedBox(
                         width: SizeConfig.horizontal(120),
-                        height: SizeConfig.horizontal(120),
+                        height: SizeConfig.horizontal(100),
                         child: StreamBuilder(
-                          stream: dashboardController.streamRowUpdateSheet(
-                              dashboardController.username.value),
+                          stream: dashboardController.streamRowCheckSheet(),
                           builder: (BuildContext context,
                               AsyncSnapshot<dynamic> snapshot) {
                             if (snapshot.hasError) {
@@ -208,14 +253,12 @@ class _TabelUpdateContentMobileState extends State<TabelUpdateContentMobile> {
 
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
-                              dashboardController.isLoading.value = true;
                               return SizedBox(
                                   width: SizeConfig.horizontal(10),
                                   height: SizeConfig.horizontal(10),
                                   child: const Center(
                                       child: CircularProgressIndicator()));
                             } else {
-                              dashboardController.isLoading.value = false;
                               final List<dynamic> stagingData =
                                   snapshot.data as List<dynamic>;
                               dashboardController.rowsStagingData.value =
@@ -226,8 +269,8 @@ class _TabelUpdateContentMobileState extends State<TabelUpdateContentMobile> {
                                 configuration: PlutoGridConfiguration(
                                   style: PlutoGridStyleConfig(
                                     borderColor: AppColors.black,
-                                    columnHeight: SizeConfig.horizontal(5),
-                                    rowHeight: SizeConfig.horizontal(5),
+                                    columnHeight: SizeConfig.horizontal(7),
+                                    rowHeight: SizeConfig.horizontal(7),
                                   ),
                                 ),
                                 columnMenuDelegate:
@@ -265,6 +308,7 @@ class _TabelUpdateContentMobileState extends State<TabelUpdateContentMobile> {
     final dynamic newValue = event.value;
     final String documentAsset = event.row.cells['no_asset']?.value as String;
     updateSheetController.noAssetUpdate.value = documentAsset;
+    log(field);
     switch (field) {
       case 'asset_name':
       case 'no_asset':
@@ -296,5 +340,67 @@ class _TabelUpdateContentMobileState extends State<TabelUpdateContentMobile> {
       default:
         print('Field $field tidak memiliki handler khusus');
     }
+  }
+}
+
+class MobilePickImage extends StatelessWidget {
+  const MobilePickImage({
+    super.key,
+    required this.updateSheetController,
+  });
+
+  final UpdateSheetController updateSheetController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: SizedBox(
+        width: SizeConfig.horizontal(40),
+        height: SizeConfig.horizontal(30),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            RobotoTextView(
+              value: 'Pilihan pengambilan gambar',
+              size: SizeConfig.safeBlockHorizontal * 3,
+              fontWeight: FontWeight.bold,
+              color: AppColors.black,
+            ),
+            const SpaceSizer(
+              vertical: 3,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                CustomFlatButton(
+                    width: 20,
+                    height: 5,
+                    backgroundColor: AppColors.maroon,
+                    textColor: AppColors.white,
+                    text: 'Gallery',
+                    textSize: SizeConfig.safeBlockHorizontal * 3,
+                    onTap: () async {
+                      await updateSheetController.pickImage(
+                          ImageSource.gallery, false, '');
+                      Get.back();
+                    }),
+                CustomFlatButton(
+                    width: 20,
+                    height: 5,
+                    backgroundColor: AppColors.maroon,
+                    textColor: AppColors.white,
+                    text: 'Camera',
+                    textSize: SizeConfig.safeBlockHorizontal * 3,
+                    onTap: () async {
+                      await updateSheetController.pickImage(
+                          ImageSource.camera, false, '');
+                      Get.back();
+                    }),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -32,7 +32,6 @@ class CheckSheetController extends GetxController {
   final RxString onChangedDropDownForm = RxString('');
   final RxString noAssetCheck = RxString('');
   final RxString picAssetCheck = RxString('');
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final RxString locationAssetCheck = RxString('');
   final RxString areaAssetCheck = RxString('');
   List<SalesData> totalCheckByArea = <SalesData>[];
