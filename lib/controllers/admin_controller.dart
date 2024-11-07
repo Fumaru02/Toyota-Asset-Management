@@ -71,8 +71,6 @@ class AdminController extends GetxController {
         .toList();
   }
 
-
-
   Future<void> getDashboardTabelData() async {
     try {
       isLoading.value = true;
@@ -317,9 +315,7 @@ class AdminController extends GetxController {
     }
   }
 
-  Future<void> sendDataToDashboard(
-    dynamic assetData,
-  ) async {
+  Future<void> sendDataToDashboard(dynamic assetData) async {
     try {
       if (assetData == null) {
         return;
@@ -332,34 +328,78 @@ class AdminController extends GetxController {
       final List<dynamic> dataList =
           assetData is RxList ? assetData.toList() : assetData as List<dynamic>;
 
-      // Konversi setiap StagingDataUser menjadi Map<String, dynamic> menggunakan JSON
-      final List<Map<String, dynamic>> dataToSend = dataList.map((item) {
+      // Konversi setiap item menjadi Map
+      final List<Map<String, dynamic>> newDataToSend = dataList.map((item) {
         if (item is StagingDataUser) {
-          // Konversi ke JSON string, lalu parse kembali ke Map
-          final String jsonString = jsonEncode(item.toJson());
-          return jsonDecode(jsonString) as Map<String, dynamic>;
+          return jsonDecode(jsonEncode(item.toJson())) as Map<String, dynamic>;
         } else if (item is Map) {
-          // Jika sudah Map, tetap lakukan proses yang sama untuk memastikan
-          final String jsonString = jsonEncode(item);
-          return jsonDecode(jsonString) as Map<String, dynamic>;
+          return jsonDecode(jsonEncode(item)) as Map<String, dynamic>;
         } else {
           throw Exception('Unsupported data type in list');
         }
       }).toList();
 
-      // Periksa apakah dokumen sudah ada
+      // Ambil data yang sudah ada
       final DocumentSnapshot<Object?> docSnapshot = await docRef.get();
-      if (docSnapshot.exists) {
-        // Dokumen ada, update data yang ada
-        await docRef.update(<Object, Object?>{
-          'list_assets': FieldValue.arrayUnion(dataToSend)
-        });
-      }
 
-      Get.snackbar('Sukses', 'Data asset berhasil dikirim');
+      if (docSnapshot.exists) {
+        // Ambil list_assets yang sudah ada
+        final Map<String, dynamic> data =
+            docSnapshot.data()! as Map<String, dynamic>;
+        final List<dynamic> existingAssets =
+            (data['list_assets'] ?? <dynamic>[]) as List<dynamic>;
+
+        // Buat list baru untuk menyimpan hasil gabungan
+        final List<Map<String, dynamic>> updatedAssets =
+            <Map<String, dynamic>>[];
+
+        // Tambahkan semua asset yang sudah ada ke list baru
+        for (final existing in existingAssets) {
+          updatedAssets.add(Map<String, dynamic>.from(existing as Map));
+        }
+
+        // Proses data baru
+        for (final Map<String, dynamic> newAsset in newDataToSend) {
+          // Cari index asset yang sudah ada dengan no_asset yang sama
+          final int existingIndex = updatedAssets.indexWhere(
+              (Map<String, dynamic> existing) =>
+                  existing['no_asset'] == newAsset['no_asset']);
+
+          if (existingIndex != -1) {
+            // Update data yang sudah ada
+            updatedAssets[existingIndex] = newAsset;
+          } else {
+            // Tambahkan data baru jika belum ada
+            updatedAssets.add(newAsset);
+          }
+        }
+
+        // Update dokumen dengan list yang sudah diproses
+        await docRef.update(<Object, Object?>{'list_assets': updatedAssets});
+
+        Get.snackbar(
+          'Sukses',
+          'Data asset berhasil diperbarui',
+          snackPosition: SnackPosition.TOP,
+        );
+      } else {
+        // Jika dokumen belum ada, buat baru
+        await docRef.set(
+            <String, List<Map<String, dynamic>>>{'list_assets': newDataToSend});
+
+        Get.snackbar(
+          'Sukses',
+          'Data asset berhasil dibuat',
+          snackPosition: SnackPosition.TOP,
+        );
+      }
     } catch (e) {
-      Get.snackbar('Error', 'Gagal menambahkan atau memperbarui data: $e');
-      print('Error detail: $e'); // Untuk debugging
+      Get.snackbar(
+        'Error',
+        'Gagal menambahkan atau memperbarui data: $e',
+        snackPosition: SnackPosition.TOP,
+      );
+      print('Error detail: $e');
     }
   }
 
