@@ -84,10 +84,10 @@ class DashboardContent extends StatelessWidget {
                       const SizedBox.shrink()
                     else
                       CustomDropDown(
-                        countTotalChecked: () =>
-                            dashboardController.totalCheckingAsset(
-                                dashboardController.onChangedDropDownPic.value,
-                                '${dashboardController.month.value}/${dashboardController.year.value}'),
+                        // countTotalChecked: () =>
+                        //     dashboardController.totalCheckingAsset(
+                        //         dashboardController.onChangedDropDownPic.value,
+                        //         '${dashboardController.month.value}/${dashboardController.year.value}'),
                         selectedDropdown: () =>
                             dashboardController.countPicHandled(
                                 dashboardController.onChangedDropDownPic.value),
@@ -181,8 +181,16 @@ class DashboardContent extends StatelessWidget {
                                   dashboardController
                                           .onChangedDropDownPic.value ==
                                       'Semua PIC')
-                                GraphPIC(
-                                    dashboardController: dashboardController)
+                                Column(
+                                  children: <Widget>[
+                                    GraphPICAssetTotal(
+                                        dashboardController:
+                                            dashboardController),
+                                    GraphPICCheckedTotal(
+                                        dashboardController:
+                                            dashboardController),
+                                  ],
+                                )
                               else
                                 GrapichSelectedPIC(
                                     dashboardController: dashboardController),
@@ -582,8 +590,8 @@ class GrapichAllArea extends StatelessWidget {
   }
 }
 
-class GraphPIC extends StatelessWidget {
-  const GraphPIC({
+class GraphPICAssetTotal extends StatelessWidget {
+  const GraphPICAssetTotal({
     super.key,
     required this.dashboardController,
     this.height,
@@ -597,65 +605,142 @@ class GraphPIC extends StatelessWidget {
   final double? fontSize;
   @override
   Widget build(BuildContext context) {
-    return Container(
-        color: AppColors.white,
-        width: SizeConfig.horizontal(width ?? 80),
-        height: SizeConfig.horizontal(height ?? 20),
-        child: SfCartesianChart(
-            primaryXAxis: CategoryAxis(
-              axisLabelFormatter: (AxisLabelRenderDetails details) {
-                final int index = details.value.toInt();
-                final String label = index < dashboardController.allPic.length
-                    ? dashboardController.allPic[index]
-                    : '';
-                return ChartAxisLabel(label, details.textStyle);
-              },
-            ),
+    final ScrollController scrollController = ScrollController();
+    return Scrollbar(
+      thumbVisibility: true,
+      controller: scrollController,
+      child: SingleChildScrollView(
+        controller: scrollController,
+        scrollDirection: Axis.horizontal,
+        child: Container(
+            color: AppColors.white,
+            height: SizeConfig.horizontal(height ?? 20),
+            width: SizeConfig.horizontal(width ?? 100),
+            child: Obx(
+              () => SfCartesianChart(
+                  primaryXAxis: CategoryAxis(
+                    labelStyle: TextStyle(
+                        fontSize: SizeConfig.safeBlockHorizontal * 0.5),
+                    axisLabelFormatter: (AxisLabelRenderDetails details) {
+                      final int index = details.value.toInt();
+                      final String label =
+                          index < dashboardController.sortedPic.length
+                              ? dashboardController.sortedPic[index]
+                              : '';
+                      return ChartAxisLabel(label, details.textStyle);
+                    },
+                  ),
 
-            // Chart title
-            title: ChartTitle(
-                text: 'Status check by PIC',
-                textStyle: TextStyle(
-                    fontSize: fontSize ?? SizeConfig.safeBlockHorizontal * 1)),
-            // Enable legend
-            legend: const Legend(isVisible: true),
+                  // Chart title
+                  title: ChartTitle(
+                      text: 'Asset Handle by PIC',
+                      textStyle: TextStyle(
+                          fontSize:
+                              fontSize ?? SizeConfig.safeBlockHorizontal * 1)),
+                  // Enable legend
+                  legend: const Legend(isVisible: true),
 
-            // Enable tooltip
-            tooltipBehavior: dashboardController.tooltipBehavior,
-            series: <ColumnSeries<SalesData, int>>[
-              ColumnSeries<SalesData, int>(
-                name: 'Total Asset',
-                spacing: 0.1,
-                dataSource: dashboardController.getDataHandledAssetPic(),
-                xValueMapper: (SalesData sales, _) => sales.month,
-                yValueMapper: (SalesData sales, _) => sales.sales,
-                // Enable data label
-                dataLabelSettings: DataLabelSettings(
-                  isVisible: true,
-                  textStyle: TextStyle(
-                      fontSize:
-                          fontSize ?? SizeConfig.safeBlockHorizontal * 0.7),
-                ),
-                // Set column width and spacing
-                width: 0.4,
-              ),
-              ColumnSeries<SalesData, int>(
-                name: 'Asset Checked',
-                color: AppColors.orangeActive,
-                dataSource: dashboardController.getTLC1DataSource(),
-                xValueMapper: (SalesData sales, _) => sales.month,
-                yValueMapper: (SalesData sales, _) => sales.sales,
-                // Enable data label
-                dataLabelSettings: DataLabelSettings(
-                  textStyle: TextStyle(
-                      fontSize:
-                          fontSize ?? SizeConfig.safeBlockHorizontal * 0.7),
-                  isVisible: true,
-                ),
-                // Set column width and spacing
-                width: 0.8,
-              )
-            ]));
+                  // Enable tooltip
+                  tooltipBehavior: dashboardController.tooltipBehavior,
+                  series: <ColumnSeries<SalesData, int>>[
+                    ColumnSeries<SalesData, int>(
+                      name: 'Total Asset',
+                      dataSource: dashboardController.getDataHandledAssetPic(),
+
+                      spacing: 0.1,
+                      xValueMapper: (SalesData sales, _) => sales.month,
+                      yValueMapper: (SalesData sales, _) => sales.sales,
+                      // Enable data label
+                      dataLabelSettings: DataLabelSettings(
+                        isVisible: true,
+                        textStyle: TextStyle(
+                            fontSize: fontSize ??
+                                SizeConfig.safeBlockHorizontal * 0.7),
+                      ),
+                      // Set column width and spacing
+                      width: 0.4,
+                    ),
+                  ]),
+            )),
+      ),
+    );
+  }
+}
+
+class GraphPICCheckedTotal extends StatelessWidget {
+  const GraphPICCheckedTotal({
+    super.key,
+    required this.dashboardController,
+    this.height,
+    this.width,
+    this.fontSize,
+  });
+
+  final DashboardController dashboardController;
+  final double? height;
+  final double? width;
+  final double? fontSize;
+  @override
+  Widget build(BuildContext context) {
+    final ScrollController scrollController = ScrollController();
+    return Scrollbar(
+      thumbVisibility: true,
+      controller: scrollController,
+      child: SingleChildScrollView(
+        controller: scrollController,
+        scrollDirection: Axis.horizontal,
+        child: Container(
+            color: AppColors.white,
+            height: SizeConfig.horizontal(height ?? 20),
+            width: SizeConfig.horizontal(width ?? 100),
+            child: Obx(
+              () => SfCartesianChart(
+                  primaryXAxis: CategoryAxis(
+                    labelStyle: TextStyle(
+                        fontSize: SizeConfig.safeBlockHorizontal * 0.5),
+                    axisLabelFormatter: (AxisLabelRenderDetails details) {
+                      final int index = details.value.toInt();
+                      final String label =
+                          index < dashboardController.sortedPicCheck.length
+                              ? dashboardController.sortedPicCheck[index]
+                              : '';
+                      return ChartAxisLabel(label, details.textStyle);
+                    },
+                  ),
+
+                  // Chart title
+                  title: ChartTitle(
+                      text: 'Asset Check by PIC',
+                      textStyle: TextStyle(
+                          fontSize:
+                              fontSize ?? SizeConfig.safeBlockHorizontal * 1)),
+                  // Enable legend
+                  legend: const Legend(isVisible: true),
+
+                  // Enable tooltip
+                  tooltipBehavior: dashboardController.tooltipBehavior,
+                  series: <ColumnSeries<SalesData, int>>[
+                    ColumnSeries<SalesData, int>(
+                      name: 'Total Check Asset',
+                      dataSource: dashboardController.getTLC1DataSource(),
+                      color: AppColors.orangeActive,
+                      spacing: 0.1,
+                      xValueMapper: (SalesData sales, _) => sales.month,
+                      yValueMapper: (SalesData sales, _) => sales.sales,
+                      // Enable data label
+                      dataLabelSettings: DataLabelSettings(
+                        isVisible: true,
+                        textStyle: TextStyle(
+                            fontSize: fontSize ??
+                                SizeConfig.safeBlockHorizontal * 0.8),
+                      ),
+                      // Set column width and spacing
+                      width: 0.4,
+                    ),
+                  ]),
+            )),
+      ),
+    );
   }
 }
 

@@ -91,15 +91,15 @@ class CheckSheetController extends GetxController {
     picTotalCheck.value = 0;
     final String modifiedArea = area.toLowerCase();
     if (data.containsKey('$initialMonth/$initialYear')) {
-      final monthData = data['$initialMonth/$initialYear'];
+      final dynamic monthData = data['$initialMonth/$initialYear'];
       if (monthData is Map && monthData.containsKey('area')) {
-        final List<dynamic> areas = monthData['area'] as List;
+        final List<dynamic> areas = monthData['area'] as List<dynamic>;
 
-        for (final area in areas) {
+        for (final dynamic area in areas) {
           if (area is Map && area.containsKey(modifiedArea)) {
-            final List<dynamic> areaData = area[modifiedArea] as List;
+            final List<dynamic> areaData = area[modifiedArea] as List<dynamic>;
 
-            for (final record in areaData) {
+            for (final dynamic record in areaData) {
               if (record is Map &&
                   record.containsKey('pic') &&
                   record['pic'] == picName) {

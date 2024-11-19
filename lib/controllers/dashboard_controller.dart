@@ -49,6 +49,8 @@ class DashboardController extends GetxController {
   RxList<int> allPicTotalCheck = RxList<int>(<int>[]);
   RxList<int> allPicTotalAssets = RxList<int>(<int>[]);
   RxList<String> sortArea = RxList<String>(<String>[]);
+  RxList<String> sortedPic = RxList<String>(<String>[]);
+  RxList<String> sortedPicCheck = RxList<String>(<String>[]);
   RxList<GetListAssets> dataList = RxList<GetListAssets>(<GetListAssets>[]);
   RxList<PlutoRow> rows = RxList<PlutoRow>(<PlutoRow>[]);
   RxList<PlutoRow> rowsStagingData = RxList<PlutoRow>(<PlutoRow>[]);
@@ -84,6 +86,7 @@ class DashboardController extends GetxController {
   String initialMonth = DateTime.now().month.toString();
   String initialYear = DateTime.now().year.toString();
   final RxMap<String, int> picAssetCounts = <String, int>{}.obs;
+  final RxMap<String, int> picAssetCheckedAsset = <String, int>{}.obs;
   final Rx<DateTime> selectedDate = DateTime.now().obs;
   final RxMap<String, int> areaTotals = <String, int>{}.obs;
   List<String> get areas => areaTotals.keys.toList();
@@ -365,52 +368,19 @@ class DashboardController extends GetxController {
       totalAssetHandledByPIC.clear();
       assetHandled.clear();
     }
-
+    sortedPic.clear();
     allPic.clear();
     final String modifiedSelectedArea = selectedArea.toLowerCase();
     totalPicByArea(date, modifiedSelectedArea);
-    final DocumentSnapshot snapshot = await FirebaseFirestore.instance
-        .collection('data')
-        .doc('checking_asset')
-        .get();
-
-    if (snapshot.exists) {
-      final Map<String, dynamic> data =
-          snapshot.data()! as Map<String, dynamic>;
-      if (data.containsKey(date)) {
-        final Map<String, dynamic> monthData =
-            data[date] as Map<String, dynamic>;
-        if (monthData.containsKey('area')) {
-          final List<dynamic> areaList = monthData['area'] as List<dynamic>;
-
-          for (final dynamic areaItem in areaList) {
-            if (areaItem is Map<String, dynamic> &&
-                areaItem.containsKey(modifiedSelectedArea)) {
-              totalCheckByArea.add(
-                  SalesData('', 1, areaItem[modifiedSelectedArea] as double));
-              return;
-            }
-          }
-        }
-      }
-    }
-    update();
+    getPicsWithCheckedCount(modifiedSelectedArea);
   }
 
-  Future<void> totalPicByArea(String date, String area) async {
-    isLoading.value = true;
-    picTotals.clear();
-    allPicTotalCheck.clear();
-    assetHandled.clear();
-
-    final String modifyStringArea = area.toLowerCase().replaceAll(' ', '_');
-
-    if (date == '0/0') {
-      date = '$initialMonth/$initialYear';
-    }
-
+  Future<void> getPicsWithCheckedCount(String targetArea) async {
+    final Map<String, int> picAssetCheckedAsset = <String, int>{};
+    // List untuk menyimpan nama-nama PIC
+    List<String> picNames = <String>[];
+    List<int> assetCounts = <int>[];
     try {
-      // Fetch checking_asset document
       final DocumentSnapshot checkingAssetSnapshot = await FirebaseFirestore
           .instance
           .collection('data')
@@ -421,41 +391,114 @@ class DashboardController extends GetxController {
         final Map<String, dynamic> data =
             checkingAssetSnapshot.data()! as Map<String, dynamic>;
 
-        if (data.containsKey(date)) {
-          final Map<String, dynamic> monthData =
-              data[date] as Map<String, dynamic>;
-          if (monthData.containsKey('PIC')) {
-            final List<dynamic> picList = monthData['PIC'] as List<dynamic>;
+        data.forEach((String month, dynamic monthData) {
+          if (monthData is Map<String, dynamic> &&
+              monthData.containsKey('area')) {
+            final List<dynamic> areas = monthData['area'] as List<dynamic>;
 
-            for (final dynamic picItem in picList) {
-              if (picItem is Map<String, dynamic>) {
-                picItem.forEach((String name, dynamic value) {
-                  if (value is List<dynamic> &&
-                      value.isNotEmpty &&
-                      value[0] is Map<String, dynamic>) {
-                    final Map<String, dynamic> firstItem =
-                        value[0] as Map<String, dynamic>;
-                    // Check if the PIC has tlc1_krw
-                    if (firstItem.containsKey(modifyStringArea)) {
-                      final int total = firstItem[modifyStringArea] as int;
-                      if (!allPic.contains(name)) {
-                        allPic.add(name);
-                      }
-                      picTotals[name] = (picTotals[name] ?? 0) + total;
-                    }
+            for (final area in areas) {
+              if (area is Map<String, dynamic> &&
+                  area.containsKey(targetArea)) {
+                final List<dynamic> assets = area[targetArea] as List<dynamic>;
+
+                for (final asset in assets) {
+                  if (asset is Map<String, dynamic> &&
+                      asset.containsKey('pic')) {
+                    final String pic = asset['pic'] as String;
+                    picAssetCheckedAsset[pic] =
+                        (picAssetCheckedAsset[pic] ?? 0) + 1;
                   }
-                });
+                }
               }
             }
+          }
+        });
 
-            allPic.sort();
+        if (picAssetCheckedAsset.isEmpty) {
+          print('No PICs found in $targetArea');
+        } else {
+          // Sort dan convert ke List<MapEntry>
+          final List<MapEntry<String, int>> sortedEntries =
+              picAssetCheckedAsset.entries.toList()
+                ..sort((MapEntry<String, int> a, MapEntry<String, int> b) =>
+                    a.key.compareTo(b.key));
 
-            // Add totals to allPicTotalCheck in the same order as allPic
-            for (final String name in allPic) {
-              allPicTotalCheck.add(picTotals[name] ?? 0);
-            }
+          // Mengambil hanya nama PIC yang sudah diurutkan
+          picNames = sortedEntries
+              .map((MapEntry<String, int> entry) => entry.key)
+              .toList();
+
+          assetCounts = sortedEntries
+              .map((MapEntry<String, int> entry) => entry.value)
+              .toList();
+          allPicTotalCheck.value = assetCounts;
+          // Assign ke sortedPicCheck untuk digunakan di UI
+          sortedPicCheck.value = picNames;
+
+          // Print hasil untuk verifikasi
+          print('\nPIC Names in $targetArea:');
+          for (int i = 0; i < picNames.length; i++) {
+            print(
+                '${i + 1}. ${picNames[i]}: ${picAssetCheckedAsset[picNames[i]]} assets');
           }
         }
+      }
+    } catch (e) {
+      print('Error fetching PIC data: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> totalPicByArea(String date, String area) async {
+    isLoading.value = true;
+    picTotals.clear();
+    allPicTotalCheck.clear();
+    allPicTotalAssets.clear();
+    sortedPic.value = <String>[];
+    assetHandled.clear();
+    picAssetCounts.clear();
+
+    final Set<String> picNames = <String>{};
+    if (date == '0/0') {
+      date = '$initialMonth/$initialYear';
+    }
+
+    try {
+      // Ambil dokumen dari collection 'data' dengan dokumen 'assets'
+      final DocumentSnapshot snapshot = await FirebaseFirestore.instance
+          .collection('data')
+          .doc('assets')
+          .get();
+
+      if (!snapshot.exists) {
+        log('Document does not exist');
+      }
+
+      // Cast data ke Map
+      final Map<String, dynamic> data =
+          snapshot.data()! as Map<String, dynamic>;
+
+      // Ambil list_assets dari data
+      if (data.containsKey('list_assets')) {
+        final List<dynamic> assets = data['list_assets'] as List<dynamic>;
+
+        // Filter assets berdasarkan area yang ditentukan
+        for (final asset in assets) {
+          if (asset is Map<String, dynamic> &&
+              asset.containsKey('area') &&
+              asset.containsKey('pic') &&
+              asset['area'].toString().toLowerCase() == area.toLowerCase()) {
+            picNames.add(asset['pic'] as String);
+          }
+        }
+      }
+      // Convert Set ke List dan sort
+      sortedPic.value = picNames.toList()..sort();
+
+      // Log untuk debugging
+      log('Found ${sortedPic.length} PICs in area $area');
+      for (final String pic in sortedPic) {
+        log('PIC: $pic');
       }
 
       // Fetch assets document
@@ -480,9 +523,11 @@ class DashboardController extends GetxController {
       }
 
       // Print the results
-      for (final String name in allPic) {
+      for (final String name in sortedPic) {
         allPicTotalAssets.add(picAssetCounts[name] ?? 0);
       }
+      log('test ${allPicTotalAssets[0]}');
+
       update();
     } catch (e) {
       log('Error: $e');
@@ -493,11 +538,11 @@ class DashboardController extends GetxController {
 
   List<SalesData> getDataHandledAssetPic() {
     // Use the actual length of allPicTotalCheck
-    final int dataLength = allPicTotalCheck.length;
+    final int dataLength = sortedPic.length;
 
     return List.generate(dataLength, (int index) {
       return SalesData(
-        'TLC#1',
+        allPicTotalAssets[index].toString(),
         index + 1,
         allPicTotalAssets[index].toDouble(),
       );
@@ -506,7 +551,7 @@ class DashboardController extends GetxController {
 
   List<SalesData> getTLC1DataSource() {
     // Use the actual length of allPicTotalCheck
-    final int dataLength = allPicTotalCheck.length;
+    final int dataLength = sortedPicCheck.length;
 
     return List.generate(dataLength, (int index) {
       return SalesData(
@@ -515,76 +560,6 @@ class DashboardController extends GetxController {
         allPicTotalCheck[index].toDouble(),
       );
     });
-  }
-
-  Future<void> totalCheckingAsset(String selectedPerson, String date) async {
-    isLoading.value = true;
-    assetHandled.clear();
-    final String modifiedSelectedPerson = selectedPerson.toLowerCase();
-    if (date == '0/0') {
-      date = '$initialMonth/$initialYear';
-    }
-    try {
-      final DocumentSnapshot snapshot = await FirebaseFirestore.instance
-          .collection('data')
-          .doc('checking_asset')
-          .get();
-
-      int total = 0;
-      if (snapshot.exists) {
-        final Map<String, dynamic> data =
-            snapshot.data()! as Map<String, dynamic>;
-
-        if (data.containsKey(date)) {
-          final Map<String, dynamic> monthData =
-              data[date] as Map<String, dynamic>;
-          if (monthData.containsKey('PIC')) {
-            final List<dynamic> picList = monthData['PIC'] as List<dynamic>;
-            print('$picList LISTT');
-            for (final dynamic picItem in picList) {
-              if (picItem is Map<String, dynamic>) {}
-              if (picItem is Map<String, dynamic> &&
-                  picItem.containsKey(modifiedSelectedPerson)) {
-                final List<dynamic> locations =
-                    picItem[modifiedSelectedPerson] as List<dynamic>;
-                print('$modifiedSelectedPerson:');
-                for (final dynamic location in locations) {
-                  if (location is Map<String, dynamic>) {
-                    location.forEach((String locationName, dynamic value) {
-                      print('L  $locationName: $value');
-                      sortArea.add(locationName);
-                      checkedAreaByPIC.add(value as int);
-                      total += value;
-                    });
-                  }
-                }
-                assetHandled.add(SalesData(
-                    '', grapicsValueAssetChecked.value, total as double));
-
-                isLoading.value = false;
-
-                return;
-              }
-            }
-            isLoading.value = false;
-
-            print('Data untuk $selectedPerson tidak ditemukan');
-          }
-        } else {
-          isLoading.value = false;
-
-          print('Data untuk bulan $date tidak ditemukan');
-        }
-      } else {
-        isLoading.value = false;
-
-        print('Dokumen Asset tidak ditemukan');
-      }
-      Future.delayed(const Duration(seconds: 1));
-      isLoading.value = false;
-    } catch (e) {
-      print('Error: $e');
-    }
   }
 
   Future<void> countSelectedLocations(String selectedArea) async {

@@ -91,10 +91,10 @@ class DashboardContentMobile extends StatelessWidget {
                         height: 8,
                         width: 50,
                         leftPadding: 2,
-                        countTotalChecked: () =>
-                            dashboardController.totalCheckingAsset(
-                                dashboardController.onChangedDropDownPic.value,
-                                '${dashboardController.month.value}/${dashboardController.year.value}'),
+                        // countTotalChecked: () =>
+                        //     dashboardController.totalCheckingAsset(
+                        //         dashboardController.onChangedDropDownPic.value,
+                        //         '${dashboardController.month.value}/${dashboardController.year.value}'),
                         selectedDropdown: () =>
                             dashboardController.countPicHandled(
                                 dashboardController.onChangedDropDownPic.value),
@@ -203,12 +203,26 @@ class DashboardContentMobile extends StatelessWidget {
                                     dashboardController
                                             .onChangedDropDownPic.value ==
                                         'Semua PIC')
-                                  GraphPIC(
-                                      fontSize:
-                                          SizeConfig.safeBlockHorizontal * 3,
-                                      height: 50,
-                                      width: 100,
-                                      dashboardController: dashboardController)
+                                  Column(
+                                    children: <Widget>[
+                                      GraphPICAssetTotal(
+                                          fontSize:
+                                              SizeConfig.safeBlockHorizontal *
+                                                  3,
+                                          height: 50,
+                                          width: 100,
+                                          dashboardController:
+                                              dashboardController),
+                                      GraphPICCheckedTotal(
+                                          fontSize:
+                                              SizeConfig.safeBlockHorizontal *
+                                                  3,
+                                          height: 50,
+                                          width: 100,
+                                          dashboardController:
+                                              dashboardController),
+                                    ],
+                                  )
                                 else
                                   GrapichSelectedPIC(
                                       fontSize:

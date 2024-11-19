@@ -266,7 +266,6 @@ class UpdateSheetController extends GetxController {
     if (noAsset == '' ||
         assetName == '' ||
         username == '' ||
-        year == '0' ||
         areaValue.value.isEmpty ||
         categoryValue.value.isEmpty ||
         picValue.value.isEmpty) {

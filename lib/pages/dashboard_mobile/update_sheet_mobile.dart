@@ -439,9 +439,6 @@ class UpdateSheetMobile extends StatelessWidget {
                                             .categoryValue.value.isEmpty ||
                                         updateSheetController
                                             .picValue.value.isEmpty ||
-                                        dashboardController.year.value
-                                                .toString() ==
-                                            '0' ||
                                         updateSheetController
                                                 .previewImageBytes.value ==
                                             null)
