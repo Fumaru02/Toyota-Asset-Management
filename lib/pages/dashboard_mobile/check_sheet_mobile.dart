@@ -13,6 +13,8 @@ import '../widgets/layout/space_sizer.dart';
 import '../widgets/text/roboto_text_view.dart';
 import 'widgets/custom_dropdown_form_mobile.dart';
 import 'widgets/tabel_check_sheet_content.dart';
+import 'widgets/tabel_check_sheet_mobile_content_by_area.dart';
+import 'widgets/tabel_check_sheet_mobile_content_by_area_pic.dart';
 
 class CheckSheetMobile extends StatelessWidget {
   const CheckSheetMobile({
@@ -81,6 +83,9 @@ class CheckSheetMobile extends StatelessWidget {
                             updateSheetController.onChangedDropDownForm.value);
                         checkSheetController.onChangedDropDownForm.value =
                             updateSheetController.onChangedDropDownForm.value;
+                             checkSheetController.isByArea.value = true;
+                        updateSheetController.onChangedDropDownPIC.value =
+                            updateSheetController.dropdownInitialPIC.value;
                       },
                       list: dashboardController.area,
                       titleDropDown: 'Area',
@@ -98,6 +103,8 @@ class CheckSheetMobile extends StatelessWidget {
                             updateSheetController.onChangedDropDownPIC.value;
                         dashboardController.countPicHandled(
                             updateSheetController.onChangedDropDownPIC.value);
+                             checkSheetController.isByArea.value = false;
+                        checkSheetController.isByAreaPic.value = true;
                       },
                       list: dashboardController.areaPics,
                       titleDropDown: 'PIC',
@@ -194,7 +201,20 @@ class CheckSheetMobile extends StatelessWidget {
                       ),
                     ),
             ),
-            const TabelCheckSheetMobileContent()
+            Obx(
+              () => updateSheetController.onChangedDropDownForm.value == 'Area'
+                  ? const TabelCheckSheetMobileContent()
+                  : Column(
+                      children: <Widget>[
+                        if (checkSheetController.isByArea.isTrue)
+                          const TabelCheckSheetMobileContentByArea()
+                        else if (checkSheetController.isByAreaPic.isTrue)
+                          const TabelCheckSheetMobileContentByAreaPic()
+                        else
+                          const TabelCheckSheetMobileContent(),
+                      ],
+                    ),
+            )
           ],
         ),
       ),

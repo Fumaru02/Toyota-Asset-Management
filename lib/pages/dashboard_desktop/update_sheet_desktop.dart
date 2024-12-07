@@ -61,6 +61,18 @@ class UpdateSheet extends StatelessWidget {
               const SpaceSizer(
                 vertical: 4,
               ),
+              Center(
+                child: RobotoTextView(
+                  alignText: AlignTextType.justify,
+                  fontWeight: FontWeight.w600,
+                  value:
+                      'Setelah mengumpulkan data pada tabel jangan lupa untuk klik Send jika sudah yakin dengan data tersebut.\n*Note: Apabila data tidak muncul setelah mencoba menambahkan data ke tabel mohon periksa koneksi anda kembali.',
+                  size: SizeConfig.safeBlockHorizontal * 1,
+                ),
+              ),
+              const SpaceSizer(
+                vertical: 1,
+              ),
               Row(
                 children: <Widget>[
                   const Spacer(),

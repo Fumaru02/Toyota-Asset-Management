@@ -77,6 +77,8 @@ class DashboardController extends GetxController {
   final RxDouble totalPersentase = RxDouble(0);
   RxInt ho = RxInt(0);
 
+  RxInt picTotalCheck = RxInt(0);
+
   RxInt tlc1krwChecked = RxInt(0);
   RxInt tlc3krwChecked = RxInt(0);
   RxInt tlc2strChecked = RxInt(0);
@@ -227,8 +229,40 @@ class DashboardController extends GetxController {
     update();
   }
 
+  Future<void> picTotalCheckDashboard(String area, String picName) async {
+    picTotalCheck.value = 0;
+
+    final String modifiedArea = area.toLowerCase();
+
+    final DocumentSnapshot documentSnapshot =
+        await _firestore.collection('data').doc('checking_asset').get();
+    final Map<String, dynamic> data =
+        documentSnapshot.data()! as Map<String, dynamic>;
+    if (data.containsKey('$initialMonth/$initialYear')) {
+      final dynamic monthData = data['$initialMonth/$initialYear'];
+      if (monthData is Map && monthData.containsKey('area')) {
+        final List<dynamic> areas = monthData['area'] as List<dynamic>;
+
+        for (final dynamic area in areas) {
+          if (area is Map && area.containsKey(modifiedArea)) {
+            final List<dynamic> areaData = area[modifiedArea] as List<dynamic>;
+
+            for (final dynamic record in areaData) {
+              if (record is Map &&
+                  record.containsKey('pic') &&
+                  record['pic'] == picName) {
+                picTotalCheck.value++;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   Future<void> countPicHandled(String pic) async {
     totalAssetHandledByPIC.clear();
+
     final DocumentSnapshot documentSnapshot =
         await _firestore.collection('data').doc('assets').get();
 
@@ -241,7 +275,6 @@ class DashboardController extends GetxController {
         documentSnapshot.data()! as Map<String, dynamic>;
 
     final List<dynamic> assets = data['list_assets'] as List<dynamic>;
-
     handledPICtotal.value = 0;
     for (final dynamic asset in assets) {
       if (asset is Map<String, dynamic>) {
@@ -526,7 +559,6 @@ class DashboardController extends GetxController {
       for (final String name in sortedPic) {
         allPicTotalAssets.add(picAssetCounts[name] ?? 0);
       }
-      log('test ${allPicTotalAssets[0]}');
 
       update();
     } catch (e) {
@@ -851,6 +883,69 @@ class DashboardController extends GetxController {
     } catch (e) {
       print('Error fetching data: $e');
     }
+  }
+
+  Stream<List<dynamic>> streamRowCheckSheetByAreaPic(String area, String pic) {
+    final String modifiedArea = area.toLowerCase();
+    return FirebaseFirestore.instance
+        .collection('data')
+        .doc('assets')
+        .snapshots()
+        .map((DocumentSnapshot<Map<String, dynamic>> docSnapshot) {
+      if (docSnapshot.exists && docSnapshot.data() != null) {
+        final Map<String, dynamic> data = docSnapshot.data()!;
+        if (data['list_assets'] is List) {
+          final List<dynamic> assets = data['list_assets'] as List<dynamic>;
+          return assets
+              .where((asset) =>
+                  (asset as Map<String, dynamic>)['area'] == modifiedArea &&
+                  (asset['pic'] == pic))
+              .map((asset) =>
+                  StagingDataUser.fromJson(asset as Map<String, dynamic>))
+              .toList();
+        } else {
+          print('list_assets is not a List or is null');
+          return <dynamic>[];
+        }
+      } else {
+        return <dynamic>[];
+      }
+    }).handleError((dynamic error, dynamic stackTrace) {
+      print('Error fetching data: $error');
+      print('Stack trace: $stackTrace');
+      return <dynamic>[];
+    });
+  }
+
+  Stream<List<dynamic>> streamRowCheckSheetByArea(String area) {
+    final String modifiedArea = area.toLowerCase();
+    return FirebaseFirestore.instance
+        .collection('data')
+        .doc('assets')
+        .snapshots()
+        .map((DocumentSnapshot<Map<String, dynamic>> docSnapshot) {
+      if (docSnapshot.exists && docSnapshot.data() != null) {
+        final Map<String, dynamic> data = docSnapshot.data()!;
+        if (data['list_assets'] is List) {
+          final List<dynamic> assets = data['list_assets'] as List<dynamic>;
+          return assets
+              .where((asset) =>
+                  (asset as Map<String, dynamic>)['area'] == modifiedArea)
+              .map((asset) =>
+                  StagingDataUser.fromJson(asset as Map<String, dynamic>))
+              .toList();
+        } else {
+          print('list_assets is not a List or is null');
+          return <dynamic>[];
+        }
+      } else {
+        return <dynamic>[];
+      }
+    }).handleError((dynamic error, dynamic stackTrace) {
+      print('Error fetching data: $error');
+      print('Stack trace: $stackTrace');
+      return <dynamic>[];
+    });
   }
 
   Stream<List<dynamic>> streamRowCheckSheet() {

@@ -212,190 +212,195 @@ class LoginForm extends StatelessWidget {
       width: SizeConfig.horizontal(width ?? 38),
       height: SizeConfig.horizontal(height ?? 38),
       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            RobotoTextView(
-              value: 'Welcome Back!',
-              size: SizeConfig.safeBlockHorizontal * 2,
-              fontWeight: FontWeight.bold,
-            ),
-            const SpaceSizer(
-              vertical: 1,
-            ),
-            RobotoTextView(
-              value: 'Continue with Google or enter your details.',
-              size: SizeConfig.safeBlockHorizontal * 1,
-            ),
-            const SpaceSizer(
-              vertical: 2,
-            ),
-            CustomFlatButton(
-                image: AssetList.googleIcon,
-                text: 'Login with Google',
-                radius: 0.5,
-                borderColor: AppColors.maroon,
-                onTap: () {
-                  // loginController.signInWithGoogle();
-                  Snack.show(SnackbarType.error, 'Information',
-                      'Login feature coming soon');
-                }),
-            const SpaceSizer(
-              vertical: 5,
-            ),
-            CustomTextField(
-              title: 'Email',
-              focus: loginController.emailFocusNode,
-              controller: loginController.emailController,
-              borderColor: loginController.isValidated.value == false
-                  ? AppColors.redAlert
-                  : AppColors.greenSuccess,
-              onChanged: (String value) {
-                loginController.validateEmail(value);
-              },
-            ),
-            if (loginController.isValidated.value == false &&
-                loginController.emailController.text != '')
-              Padding(
-                padding: EdgeInsets.only(left: SizeConfig.horizontal(6.5)),
-                child: Row(
-                  children: <Widget>[
-                    Icon(
-                      Icons.warning,
-                      color: AppColors.yellowWarning,
-                    ),
-                    RobotoTextView(
-                      value: 'Please enter a valid email address.',
-                      size: SizeConfig.safeBlockHorizontal * 1,
-                      color: AppColors.yellowWarning,
-                    ),
-                  ],
-                ),
-              )
-            else
-              const SizedBox.shrink(),
-            const SpaceSizer(
-              vertical: 3,
-            ),
-            CustomTextField(
-              title: 'Password',
-              isPasswordField: true,
-              controller: loginController.passwordController,
-              focus: loginController.passwordFocusNode,
-            ),
-            Padding(
-              padding: EdgeInsets.only(right: SizeConfig.horizontal(6)),
-              child: Align(
-                alignment: Alignment.bottomRight,
-                child: TextButton(
-                    onPressed: () => showDialog(
-                        context: context,
-                        builder: (BuildContext context) => Dialog(
-                            child: Container(
-                                width: SizeConfig.horizontal(30),
-                                height: SizeConfig.horizontal(15),
-                                decoration: BoxDecoration(
-                                    color: AppColors.white,
-                                    borderRadius: BorderRadius.all(
-                                        Radius.circular(
-                                            SizeConfig.horizontal(2)))),
-                                child: Column(
-                                  children: <Widget>[
-                                    const SpaceSizer(
-                                      vertical: 2,
-                                    ),
-                                    RobotoTextView(
-                                      value:
-                                          'Please enter a valid email address.',
-                                      size:
-                                          SizeConfig.safeBlockHorizontal * 1.5,
-                                      color: AppColors.black,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    const SpaceSizer(
-                                      vertical: 2,
-                                    ),
-                                    Obx(
-                                      () => CustomTextField(
-                                        title: 'Email',
-                                        focus: loginController.emailFocusNode,
-                                        controller:
-                                            loginController.emailController,
-                                        borderColor:
-                                            loginController.isValidated.value ==
-                                                    false
-                                                ? AppColors.redAlert
-                                                : AppColors.greenSuccess,
-                                        onChanged: (String value) {
-                                          loginController.validateEmail(value);
-                                        },
-                                      ),
-                                    ),
-                                    const SpaceSizer(
-                                      vertical: 2,
-                                    ),
-                                    CustomFlatButton(
-                                        text: 'Send Link to Email',
-                                        radius: 0.5,
-                                        backgroundColor: AppColors.maroon,
-                                        textColor: AppColors.white,
-                                        onTap: () {
-                                          loginController.resetPassword();
-                                        }),
-                                  ],
-                                )))),
-                    child: Center(
-                      child: Padding(
-                        padding:
-                            EdgeInsets.only(left: SizeConfig.horizontal(21)),
-                        child: RobotoTextView(
-                          value: 'Forgot Password',
-                          size: SizeConfig.safeBlockHorizontal * 1,
-                          color: AppColors.maroon,
-                        ),
-                      ),
-                    )),
+        child: AutofillGroup(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              RobotoTextView(
+                value: 'Welcome Back!',
+                size: SizeConfig.safeBlockHorizontal * 2,
+                fontWeight: FontWeight.bold,
               ),
-            ),
-            const SpaceSizer(
-              vertical: 3,
-            ),
-            Obx(
-              () => CustomFlatButton(
-                  loading: loginController.isLoading.value,
-                  widthCircleLoading: 2,
-                  heightCircleLoading: 2,
-                  text: 'Login',
+              const SpaceSizer(
+                vertical: 1,
+              ),
+              RobotoTextView(
+                value: 'Continue with Google or enter your details.',
+                size: SizeConfig.safeBlockHorizontal * 1,
+              ),
+              const SpaceSizer(
+                vertical: 2,
+              ),
+              CustomFlatButton(
+                  image: AssetList.googleIcon,
+                  text: 'Login with Google',
                   radius: 0.5,
-                  textColor: AppColors.white,
-                  backgroundColor: AppColors.maroon,
-                  onTap: () async {
-                    await loginController.signInWithEmailAndPassword();
-                    loginController.emailController.clear();
-                    loginController.passwordController.clear();
+                  borderColor: AppColors.maroon,
+                  onTap: () {
+                    // loginController.signInWithGoogle();
+                    Snack.show(SnackbarType.error, 'Information',
+                        'Login feature coming soon');
                   }),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                RobotoTextView(
-                  value: "Doesn't have an account?",
-                  size: SizeConfig.safeBlockHorizontal * 1,
-                  fontWeight: FontWeight.bold,
-                ),
-                Align(
+              const SpaceSizer(
+                vertical: 5,
+              ),
+              CustomTextField(
+                autofillHint: const <String>[AutofillHints.email],
+                title: 'Email',
+                focus: loginController.emailFocusNode,
+                controller: loginController.emailController,
+                borderColor: loginController.isValidated.value == false
+                    ? AppColors.redAlert
+                    : AppColors.greenSuccess,
+                onChanged: (String value) {
+                  loginController.validateEmail(value);
+                },
+              ),
+              if (loginController.isValidated.value == false &&
+                  loginController.emailController.text != '')
+                Padding(
+                  padding: EdgeInsets.only(left: SizeConfig.horizontal(6.5)),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(
+                        Icons.warning,
+                        color: AppColors.yellowWarning,
+                      ),
+                      RobotoTextView(
+                        value: 'Please enter a valid email address.',
+                        size: SizeConfig.safeBlockHorizontal * 1,
+                        color: AppColors.yellowWarning,
+                      ),
+                    ],
+                  ),
+                )
+              else
+                const SizedBox.shrink(),
+              const SpaceSizer(
+                vertical: 3,
+              ),
+              CustomTextField(
+                autofillHint: const <String>[AutofillHints.password],
+                title: 'Password',
+                isPasswordField: true,
+                controller: loginController.passwordController,
+                focus: loginController.passwordFocusNode,
+              ),
+              Padding(
+                padding: EdgeInsets.only(right: SizeConfig.horizontal(6)),
+                child: Align(
                   alignment: Alignment.bottomRight,
                   child: TextButton(
-                      onPressed: () => loginController.changeForm(),
-                      child: RobotoTextView(
-                        value: 'Sign Up',
-                        size: SizeConfig.safeBlockHorizontal * 1,
-                        color: AppColors.maroon,
+                      onPressed: () => showDialog(
+                          context: context,
+                          builder: (BuildContext context) => Dialog(
+                              child: Container(
+                                  width: SizeConfig.horizontal(30),
+                                  height: SizeConfig.horizontal(15),
+                                  decoration: BoxDecoration(
+                                      color: AppColors.white,
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(
+                                              SizeConfig.horizontal(2)))),
+                                  child: Column(
+                                    children: <Widget>[
+                                      const SpaceSizer(
+                                        vertical: 2,
+                                      ),
+                                      RobotoTextView(
+                                        value:
+                                            'Please enter a valid email address.',
+                                        size: SizeConfig.safeBlockHorizontal *
+                                            1.5,
+                                        color: AppColors.black,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      const SpaceSizer(
+                                        vertical: 2,
+                                      ),
+                                      Obx(
+                                        () => CustomTextField(
+                                          title: 'Email',
+                                          focus: loginController.emailFocusNode,
+                                          controller:
+                                              loginController.emailController,
+                                          borderColor: loginController
+                                                      .isValidated.value ==
+                                                  false
+                                              ? AppColors.redAlert
+                                              : AppColors.greenSuccess,
+                                          onChanged: (String value) {
+                                            loginController
+                                                .validateEmail(value);
+                                          },
+                                        ),
+                                      ),
+                                      const SpaceSizer(
+                                        vertical: 2,
+                                      ),
+                                      CustomFlatButton(
+                                          text: 'Send Link to Email',
+                                          radius: 0.5,
+                                          backgroundColor: AppColors.maroon,
+                                          textColor: AppColors.white,
+                                          onTap: () {
+                                            loginController.resetPassword();
+                                          }),
+                                    ],
+                                  )))),
+                      child: Center(
+                        child: Padding(
+                          padding:
+                              EdgeInsets.only(left: SizeConfig.horizontal(21)),
+                          child: RobotoTextView(
+                            value: 'Forgot Password',
+                            size: SizeConfig.safeBlockHorizontal * 1,
+                            color: AppColors.maroon,
+                          ),
+                        ),
                       )),
                 ),
-              ],
-            ),
-          ],
+              ),
+              const SpaceSizer(
+                vertical: 3,
+              ),
+              Obx(
+                () => CustomFlatButton(
+                    loading: loginController.isLoading.value,
+                    widthCircleLoading: 2,
+                    heightCircleLoading: 2,
+                    text: 'Login',
+                    radius: 0.5,
+                    textColor: AppColors.white,
+                    backgroundColor: AppColors.maroon,
+                    onTap: () async {
+                      await loginController.signInWithEmailAndPassword();
+                      loginController.emailController.clear();
+                      loginController.passwordController.clear();
+                    }),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  RobotoTextView(
+                    value: "Doesn't have an account?",
+                    size: SizeConfig.safeBlockHorizontal * 1,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: TextButton(
+                        onPressed: () => loginController.changeForm(),
+                        child: RobotoTextView(
+                          value: 'Sign Up',
+                          size: SizeConfig.safeBlockHorizontal * 1,
+                          color: AppColors.maroon,
+                        )),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

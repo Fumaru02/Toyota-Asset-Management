@@ -84,13 +84,14 @@ class DashboardContent extends StatelessWidget {
                       const SizedBox.shrink()
                     else
                       CustomDropDown(
-                        // countTotalChecked: () =>
-                        //     dashboardController.totalCheckingAsset(
-                        //         dashboardController.onChangedDropDownPic.value,
-                        //         '${dashboardController.month.value}/${dashboardController.year.value}'),
-                        selectedDropdown: () =>
-                            dashboardController.countPicHandled(
+                        countTotalChecked: () =>
+                            dashboardController.picTotalCheckDashboard(
+                                dashboardController.onChangedDropDownArea.value,
                                 dashboardController.onChangedDropDownPic.value),
+                        selectedDropdown: () {
+                          dashboardController.countPicHandled(
+                              dashboardController.onChangedDropDownPic.value);
+                        },
                         initialDropdown: dashboardController.dropdownInitialPic,
                         onChangedDropDownValue:
                             dashboardController.onChangedDropDownPic,
@@ -265,7 +266,13 @@ class GrapichSelectedPIC extends StatelessWidget {
                 ColumnSeries<SalesData, int>(
                   name: 'Asset Checked',
                   color: AppColors.orangeActive,
-                  dataSource: dashboardController.assetHandled,
+                  dataSource: <SalesData>[
+                    SalesData(
+                      '',
+                      0,
+                      dashboardController.picTotalCheck.value.toDouble(),
+                    ),
+                  ],
                   xValueMapper: (SalesData sales, _) => sales.month,
                   yValueMapper: (SalesData sales, _) => sales.sales,
                   dataLabelSettings: DataLabelSettings(

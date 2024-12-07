@@ -38,6 +38,8 @@ class CheckSheetController extends GetxController {
   final Rx<Map<String, dynamic>> assetData =
       Rx<Map<String, dynamic>>(<String, dynamic>{});
   final RxBool isLoading = RxBool(false);
+  final RxBool isByArea = RxBool(false);
+  final RxBool isByAreaPic = RxBool(false);
 
   String initialMonth = DateTime.now().month.toString();
   String initialYear = DateTime.now().year.toString();

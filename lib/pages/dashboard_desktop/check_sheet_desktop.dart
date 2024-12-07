@@ -12,6 +12,8 @@ import '../widgets/layout/space_sizer.dart';
 import '../widgets/text/roboto_text_view.dart';
 import 'dashboard_content.dart';
 import 'widgets/tabel_check_sheet_content.dart';
+import 'widgets/tabel_check_sheet_content_by_area.dart';
+import 'widgets/tabel_check_sheet_content_by_area_pic.dart';
 
 class CheckSheetDesktop extends StatelessWidget {
   const CheckSheetDesktop({
@@ -78,6 +80,9 @@ class CheckSheetDesktop extends StatelessWidget {
                             updateSheetController.onChangedDropDownForm.value);
                         checkSheetController.onChangedDropDownForm.value =
                             updateSheetController.onChangedDropDownForm.value;
+                        checkSheetController.isByArea.value = true;
+                        updateSheetController.onChangedDropDownPIC.value =
+                            updateSheetController.dropdownInitialPIC.value;
                       },
                       list: dashboardController.area,
                       titleDropDown: 'Area',
@@ -96,6 +101,8 @@ class CheckSheetDesktop extends StatelessWidget {
                             updateSheetController.onChangedDropDownPIC.value;
                         dashboardController.countPicHandled(
                             updateSheetController.onChangedDropDownPIC.value);
+                        checkSheetController.isByArea.value = false;
+                        checkSheetController.isByAreaPic.value = true;
                       },
                       list: dashboardController.areaPics,
                       titleDropDown: 'PIC',
@@ -180,7 +187,20 @@ class CheckSheetDesktop extends StatelessWidget {
                 ),
               ],
             ),
-            const TabelCheckSheetContent()
+            Obx(
+              () => updateSheetController.onChangedDropDownForm.value == 'Area'
+                  ? const TabelCheckSheetContent()
+                  : Column(
+                      children: <Widget>[
+                        if (checkSheetController.isByArea.isTrue)
+                          const TabelCheckSheetContentByArea()
+                        else if (checkSheetController.isByAreaPic.isTrue)
+                          const TabelCheckSheetContentByAreaPic()
+                        else
+                          const TabelCheckSheetContent(),
+                      ],
+                    ),
+            )
           ],
         ),
       ),
